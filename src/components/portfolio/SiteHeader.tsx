@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 
 const links = [
   { label: "Services", href: "#services" },
+  { label: "Luzi Studios", href: "#studio" },
   { label: "Greenville RP", href: "#greenville" },
   { label: "Contact", href: "#contact" },
 ] as const;
@@ -35,7 +36,7 @@ function useActiveAnchor(ids: string[]) {
 }
 
 export default function SiteHeader() {
-  const ids = useMemo(() => ["services", "greenville", "contact"], []);
+  const ids = useMemo(() => ["services", "studio", "greenville", "contact"], []);
   const active = useActiveAnchor(ids);
   const [open, setOpen] = useState(false);
 
