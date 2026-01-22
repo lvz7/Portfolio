@@ -1,1 +1,4 @@
 project_id = "chwkksbbhckrhpudclvy"
+
+[functions.reviews-admin]
+verify_jwt = false

@@ -46,7 +46,7 @@ export default function HeroSection() {
               className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg"
             >
               I design profile pictures and banners, and I love developing and improving communities — especially my
-              Greenville roleplay server.
+              LGVRP server.
             </motion.p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -93,7 +93,7 @@ export default function HeroSection() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-muted-foreground">Currently building</div>
-                  <div className="mt-1 font-display text-lg font-semibold">Greenville Roleplay</div>
+                  <div className="mt-1 font-display text-lg font-semibold">LGVRP</div>
                 </div>
                 <div className="h-12 w-12 rounded-2xl bg-hero shadow-glow" aria-hidden />
               </div>

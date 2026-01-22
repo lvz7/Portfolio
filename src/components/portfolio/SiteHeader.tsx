@@ -6,7 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 const links = [
   { label: "Services", href: "#services" },
   { label: "Luzi Studios", href: "#studio" },
-  { label: "Greenville RP", href: "#greenville" },
+  { label: "LGVRP", href: "#greenville" },
+  { label: "Reviews", href: "#reviews" },
   { label: "Contact", href: "#contact" },
 ] as const;
 
@@ -36,7 +37,7 @@ function useActiveAnchor(ids: string[]) {
 }
 
 export default function SiteHeader() {
-  const ids = useMemo(() => ["services", "studio", "greenville", "contact"], []);
+  const ids = useMemo(() => ["services", "studio", "greenville", "reviews", "contact"], []);
   const active = useActiveAnchor(ids);
   const [open, setOpen] = useState(false);
 
@@ -49,7 +50,7 @@ export default function SiteHeader() {
           </div>
           <div className="leading-tight">
             <div className="font-display text-sm font-semibold tracking-wide">Luzi</div>
-            <div className="text-xs text-muted-foreground">Designs & Server Dev</div>
+              <div className="text-xs text-muted-foreground">Designs • LGVRP • Server Dev</div>
           </div>
         </a>
 

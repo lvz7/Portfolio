@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { motion, useReducedMotion } from "framer-motion";
 import { CreditCard, ExternalLink, ShoppingBag } from "lucide-react";
 
@@ -15,18 +14,6 @@ export default function LuziStudiosSection() {
             <p className="mt-2 max-w-2xl text-muted-foreground">
               A simple hub for commissions — purchase designs and join the Discord to stay updated.
             </p>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2 md:mt-0">
-            <Badge variant="secondary" className="bg-secondary/70">
-              Designs
-            </Badge>
-            <Badge variant="secondary" className="bg-secondary/70">
-              Purchase
-            </Badge>
-            <Badge variant="secondary" className="bg-secondary/70">
-              Discord
-            </Badge>
           </div>
         </div>
 
@@ -108,7 +95,7 @@ export default function LuziStudiosSection() {
                 variant="outline"
                 className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-border hover:bg-card/75"
               >
-                <a href="#greenville">Greenville RP</a>
+                <a href="#greenville">LGVRP</a>
               </Button>
             </div>
           </motion.article>

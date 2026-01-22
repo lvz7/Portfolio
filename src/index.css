@@ -8,49 +8,51 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Luzi — neon craft on a deep studio canvas */
-    --background: 230 35% 6%;
+    /* Luzi — baby blue highlights on a deep red studio canvas */
+    --background: 352 45% 7%;
     --foreground: 210 40% 98%;
 
-    --card: 231 28% 10%;
+    --card: 352 34% 10%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 231 28% 10%;
+    --popover: 352 34% 10%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 268 84% 66%;
-    --primary-foreground: 230 35% 6%;
+    /* Primary = baby blue */
+    --primary: 198 92% 72%;
+    --primary-foreground: 352 45% 7%;
 
-    --secondary: 231 24% 14%;
+    --secondary: 350 28% 14%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 231 22% 14%;
+    --muted: 350 24% 14%;
     --muted-foreground: 222 16% 70%;
 
-    --accent: 188 94% 45%;
-    --accent-foreground: 230 35% 6%;
+    /* Accent = dark red */
+    --accent: 352 72% 46%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 78% 56%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 231 18% 20%;
-    --input: 231 18% 20%;
-    --ring: 188 94% 45%;
+    --border: 350 18% 22%;
+    --input: 350 18% 22%;
+    --ring: 198 92% 72%;
 
     --radius: 0.9rem;
 
     /* Brand helpers (still semantic) */
-    --brand: 268 84% 66%;
-    --brand-2: 188 94% 45%;
+    --brand: 198 92% 72%;
+    --brand-2: 352 72% 46%;
 
-    --gradient-hero: radial-gradient(1200px 600px at var(--mx, 30%) var(--my, 20%), hsl(var(--brand) / 0.30), transparent 55%),
-      radial-gradient(900px 500px at 80% 40%, hsl(var(--brand-2) / 0.22), transparent 60%),
-      linear-gradient(180deg, hsl(var(--background)), hsl(231 28% 8%));
+    --gradient-hero: radial-gradient(1200px 600px at var(--mx, 30%) var(--my, 20%), hsl(var(--brand) / 0.28), transparent 58%),
+      radial-gradient(900px 500px at 80% 40%, hsl(var(--brand-2) / 0.24), transparent 62%),
+      linear-gradient(180deg, hsl(var(--background)), hsl(352 40% 6%));
 
     --gradient-sheen: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.12), transparent);
 
-    --shadow-elevated: 0 18px 60px -18px hsl(230 35% 2% / 0.75);
-    --shadow-glow: 0 18px 60px -18px hsl(var(--brand) / 0.55);
+    --shadow-elevated: 0 18px 60px -18px hsl(352 45% 2% / 0.7);
+    --shadow-glow: 0 18px 60px -18px hsl(var(--brand) / 0.5);
 
     --font-sans: ui-sans-serif;
     --font-display: ui-sans-serif;
@@ -74,33 +76,33 @@ All colors MUST be HSL.
 
   .dark {
     /* Keep parity if a dark class is applied */
-    --background: 230 35% 6%;
+    --background: 352 45% 7%;
     --foreground: 210 40% 98%;
 
-    --card: 231 28% 10%;
+    --card: 352 34% 10%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 231 28% 10%;
+    --popover: 352 34% 10%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 268 84% 66%;
-    --primary-foreground: 230 35% 6%;
+    --primary: 198 92% 72%;
+    --primary-foreground: 352 45% 7%;
 
-    --secondary: 231 24% 14%;
+    --secondary: 350 28% 14%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 231 22% 14%;
+    --muted: 350 24% 14%;
     --muted-foreground: 222 16% 70%;
 
-    --accent: 188 94% 45%;
-    --accent-foreground: 230 35% 6%;
+    --accent: 352 72% 46%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 78% 56%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 231 18% 20%;
-    --input: 231 18% 20%;
-    --ring: 188 94% 45%;
+    --border: 350 18% 22%;
+    --input: 350 18% 22%;
+    --ring: 198 92% 72%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

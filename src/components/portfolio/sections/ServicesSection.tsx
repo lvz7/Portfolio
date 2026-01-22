@@ -8,25 +8,25 @@ const services = [
     icon: Brush,
     title: "Profile Pictures",
     desc: "Clean icons, mascots, and stylized portraits that read well at small sizes.",
-    tags: ["High contrast", "Readable", "Fast"],
+    tags: ["High contrast", "Readable"],
   },
   {
     icon: Layout,
     title: "Banners & Headers",
     desc: "Social + server banners with depth, lighting, and a strong focal point.",
-    tags: ["Layered", "Glow", "Brand"],
+    tags: ["Layered", "Glow"],
   },
   {
     icon: ImageIcon,
     title: "Thumbnails",
     desc: "Punchy layouts that stand out in a feed and match your vibe.",
-    tags: ["Bold type", "Composition", "Clarity"],
+    tags: ["Bold type", "Clarity"],
   },
   {
     icon: Palette,
     title: "Server Visuals",
     desc: "UI style direction and assets for roleplay servers (icons, panels, splash screens).",
-    tags: ["Systems", "Consistency", "Polish"],
+    tags: ["Systems", "Polish"],
   },
 ] as const;
 
@@ -53,7 +53,7 @@ export default function ServicesSection() {
           </Button>
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-4 md:grid-cols-2">
           {services.map((s, idx) => (
             <motion.article
               key={s.title}
@@ -67,9 +67,6 @@ export default function ServicesSection() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-hero shadow-glow transition-transform group-hover:-translate-y-0.5">
                   <s.icon className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="rounded-full border border-border/70 bg-background/40 px-3 py-1 text-xs text-muted-foreground">
-                  commissions
-                </span>
               </div>
 
               <h3 className="mt-5 font-display text-lg font-semibold">{s.title}</h3>

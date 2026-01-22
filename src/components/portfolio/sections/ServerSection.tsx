@@ -17,9 +17,9 @@ export default function ServerSection() {
       <div className="container py-16 md:py-20">
         <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-start">
           <div>
-            <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Greenville Roleplay</h2>
+            <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">LGVRP</h2>
             <p className="mt-2 text-muted-foreground">
-              I run a Greenville roleplay server and I’m always building new systems and improving the experience.
+              I run LGVRP and I’m always building new systems and improving the experience.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
