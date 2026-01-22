@@ -116,7 +116,7 @@ export default function HeroSection() {
 
               <div className="mt-6 rounded-2xl border border-border/60 bg-background/40 p-4">
                 <p className="text-sm text-muted-foreground">
-                  Want a new banner, icon, or server UI vibe? Tell me your theme and I’ll match it.
+                 Are you in the need of a new Banner, Profile Picture, etc.? Have a look!
                 </p>
               </div>
             </div>
