@@ -68,11 +68,11 @@ export default function GallerySection() {
             <CarouselContent className="-ml-4">
               {designs.map((design, index) => (
                 <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
-                  <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-elevated backdrop-blur-md h-64 flex items-center justify-center">
+                  <div className="overflow-hidden rounded-2xl border border-border/70 shadow-elevated">
                     <img
                       src={design.src}
                       alt={design.alt}
-                      className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
+                      className="w-full h-auto object-contain transition-transform duration-300 hover:scale-105"
                     />
                   </div>
                 </CarouselItem>
