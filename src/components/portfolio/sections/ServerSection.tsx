@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Code2, Users, Wrench } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
+import { SiTiktok, SiYoutube } from "react-icons/si";
 import lgvrpBanner from "@/assets/lgvrp-banner.png";
 import lgvrpLogo from "@/assets/lgvrp-logo.png";
 
@@ -69,7 +70,20 @@ export default function ServerSection() {
                 variant="outline"
                 className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-border hover:bg-card/75"
               >
-                <a href="#contact">Help me build</a>
+                <a href="https://www.tiktok.com/@luzisgvrp" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <SiTiktok className="h-4 w-4" />
+                  TikTok
+                </a>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-border hover:bg-card/75"
+              >
+                <a href="https://www.youtube.com/@luzisgvrp" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <SiYoutube className="h-4 w-4" />
+                  YouTube
+                </a>
               </Button>
             </div>
           </div>

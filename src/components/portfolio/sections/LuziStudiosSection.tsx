@@ -67,22 +67,8 @@ export default function LuziStudiosSection() {
               className="bg-[hsl(var(--brand-studio))] text-white shadow-[var(--shadow-glow-studio)] hover:brightness-110"
             >
               <a href="https://discord.gg/Z9ABvJRYW7" target="_blank" rel="noopener noreferrer">
-                Join Discord
+                Join Luzi Studios Discord
               </a>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-[hsl(var(--brand-studio)/0.4)] hover:bg-card/75"
-            >
-              <a href="#lgvrp">LGVRP</a>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-[hsl(var(--brand-lyrp)/0.4)] hover:bg-card/75"
-            >
-              <a href="#lyrp">LYRP</a>
             </Button>
           </div>
         </motion.article>

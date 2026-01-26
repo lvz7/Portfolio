@@ -159,17 +159,25 @@ export default function ReviewsSection() {
               </div>
 
               <div className="grid gap-2">
-                <label className="text-sm text-muted-foreground" htmlFor="review-rating">
-                  Rating (1–5)
+                <label className="text-sm text-muted-foreground">
+                  Rating
                 </label>
-                <Input
-                  id="review-rating"
-                  type="number"
-                  min={1}
-                  max={5}
-                  className="bg-background/40"
-                  {...form.register("rating", { valueAsNumber: true })}
-                />
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => form.setValue("rating", star)}
+                      className={`text-2xl transition-colors ${
+                        star <= form.watch("rating")
+                          ? "text-primary hover:text-primary/80"
+                          : "text-muted-foreground/40 hover:text-muted-foreground"
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
                 {form.formState.errors.rating?.message ? (
                   <p className="text-xs text-destructive">{form.formState.errors.rating.message}</p>
                 ) : null}
@@ -203,7 +211,7 @@ export default function ReviewsSection() {
 
           <div className="rounded-3xl border border-border/70 bg-card/70 p-6 shadow-elevated backdrop-blur-md">
             <div className="flex items-center justify-between">
-              <h3 className="font-display text-lg font-semibold">Approved reviews</h3>
+              <h3 className="font-display text-lg font-semibold">Reviews</h3>
               <span className="text-xs text-muted-foreground">latest</span>
             </div>
 

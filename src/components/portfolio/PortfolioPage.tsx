@@ -1,6 +1,7 @@
 import SiteHeader from "@/components/portfolio/SiteHeader";
 import HeroSection from "@/components/portfolio/sections/HeroSection";
 import ServicesSection from "@/components/portfolio/sections/ServicesSection";
+import GallerySection from "@/components/portfolio/sections/GallerySection";
 import LuziStudiosSection from "@/components/portfolio/sections/LuziStudiosSection";
 import ServerSection from "@/components/portfolio/sections/ServerSection";
 import LYRPSection from "@/components/portfolio/sections/LYRPSection";
@@ -21,6 +22,7 @@ export default function PortfolioPage() {
       <main id="main">
         <HeroSection />
         <ServicesSection />
+        <GallerySection />
         <LuziStudiosSection />
         <ServerSection />
         <LYRPSection />
