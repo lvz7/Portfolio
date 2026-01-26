@@ -72,7 +72,7 @@ export default function GallerySection() {
                     <img
                       src={design.src}
                       alt={design.alt}
-                      className="w-full h-auto object-contain transition-transform duration-300 hover:scale-105"
+                      className="w-full transition-transform duration-300 hover:scale-105"
                     />
                   </div>
                 </CarouselItem>
