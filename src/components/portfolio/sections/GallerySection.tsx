@@ -65,15 +65,18 @@ export default function GallerySection() {
             }}
             className="w-full"
           >
-            <CarouselContent className="-ml-4">
+            <CarouselContent className="-ml-4 items-stretch">
               {designs.map((design, index) => (
-                <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
-                  <div className="overflow-hidden rounded-2xl border border-border/70 shadow-elevated">
-                    <img
-                      src={design.src}
-                      alt={design.alt}
-                      className="w-full transition-transform duration-300 hover:scale-105"
-                    />
+                <CarouselItem key={index} className="pl-4 basis-auto shrink-0">
+                  <div className="w-fit overflow-hidden rounded-2xl border border-border/70 bg-card/40 shadow-elevated transition-transform duration-300 hover:scale-[1.02]">
+                    <div className="flex h-64 items-center justify-center md:h-72">
+                      <img
+                        src={design.src}
+                        alt={design.alt}
+                        loading="lazy"
+                        className="h-full w-auto shrink-0"
+                      />
+                    </div>
                   </div>
                 </CarouselItem>
               ))}
