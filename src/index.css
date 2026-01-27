@@ -2,21 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes snow {
-  0% {
-    transform: translateY(-10px) translateX(0);
-  }
-  50% {
-    transform: translateY(50vh) translateX(20px);
-  }
-  100% {
-    transform: translateY(100vh) translateX(-10px);
-  }
-}
-
-.animate-snow {
-  animation: snow linear infinite;
-}
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.

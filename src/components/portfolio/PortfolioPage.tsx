@@ -7,12 +7,9 @@ import ServerSection from "@/components/portfolio/sections/ServerSection";
 import LYRPSection from "@/components/portfolio/sections/LYRPSection";
 import ReviewsSection from "@/components/portfolio/sections/ReviewsSection";
 import ContactSection from "@/components/portfolio/sections/ContactSection";
-import SnowOverlay from "@/components/portfolio/components/SnowOverlay";
-
 export default function PortfolioPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SnowOverlay />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-foreground"
