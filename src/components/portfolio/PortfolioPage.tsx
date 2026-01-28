@@ -5,6 +5,7 @@ import GallerySection from "@/components/portfolio/sections/GallerySection";
 import LuziStudiosSection from "@/components/portfolio/sections/LuziStudiosSection";
 import ServerSection from "@/components/portfolio/sections/ServerSection";
 import LYRPSection from "@/components/portfolio/sections/LYRPSection";
+import KoyosanSection from "@/components/portfolio/sections/KoyosanSection";
 import ReviewsSection from "@/components/portfolio/sections/ReviewsSection";
 import ContactSection from "@/components/portfolio/sections/ContactSection";
 export default function PortfolioPage() {
@@ -25,6 +26,7 @@ export default function PortfolioPage() {
         <LuziStudiosSection />
         <ServerSection />
         <LYRPSection />
+        <KoyosanSection />
         <ReviewsSection />
         <ContactSection />
       </main>

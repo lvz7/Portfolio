@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import luziPfp from "@/assets/luzi-pfp.png";
 import lgvrpLogo from "@/assets/lgvrp-logo.png";
 import lyrpLogo from "@/assets/lyrp-logo.png";
+import koyosanLogo from "@/assets/koyosan-logo.png";
 
 const chips = [
   { icon: Brush, label: "Profile pics" },
@@ -100,10 +101,10 @@ export default function HeroSection() {
             className="relative"
           >
             <div className="rounded-3xl border border-border/70 bg-card/70 p-6 shadow-elevated backdrop-blur-md">
-              <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-muted-foreground">Currently building</div>
-                  <div className="mt-1 font-display text-lg font-semibold">LGVRP & LYRP</div>
+                  <div className="mt-1 font-display text-lg font-semibold">LGVRP, LYRP & Koyosan</div>
                 </div>
                 <div className="flex -space-x-3">
                   <img
@@ -115,6 +116,11 @@ export default function HeroSection() {
                     src={lyrpLogo}
                     alt="LYRP"
                     className="h-12 w-12 rounded-full border-2 border-[hsl(var(--brand-lyrp))] shadow-[var(--shadow-glow-lyrp)] object-cover"
+                  />
+                  <img
+                    src={koyosanLogo}
+                    alt="Koyosan"
+                    className="h-12 w-12 rounded-full border-2 border-[hsl(var(--brand-koyosan))] shadow-[var(--shadow-glow-koyosan)] object-cover bg-white"
                   />
                 </div>
               </div>
