@@ -51,6 +51,9 @@ All colors MUST be HSL.
     /* Luzi Studios = grey/white */
     --brand-studio: 220 10% 50%;
     --brand-studio-muted: 220 10% 20%;
+    /* Koyosan = #ff3962 pink-coral */
+    --brand-koyosan: 346 100% 61%;
+    --brand-koyosan-muted: 346 40% 20%;
 
     --gradient-hero: radial-gradient(1200px 600px at var(--mx, 30%) var(--my, 20%), hsl(var(--brand) / 0.28), transparent 58%),
       radial-gradient(900px 500px at 80% 40%, hsl(var(--brand-2) / 0.24), transparent 62%),
@@ -62,6 +65,7 @@ All colors MUST be HSL.
     --shadow-glow: 0 18px 60px -18px hsl(var(--brand) / 0.5);
     --shadow-glow-lyrp: 0 18px 60px -18px hsl(var(--brand-lyrp) / 0.5);
     --shadow-glow-studio: 0 18px 60px -18px hsl(var(--brand-studio) / 0.4);
+    --shadow-glow-koyosan: 0 18px 60px -18px hsl(var(--brand-koyosan) / 0.5);
 
     --font-sans: ui-sans-serif;
     --font-display: ui-sans-serif;
