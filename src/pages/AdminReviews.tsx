@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useMemo, useState } from "react";
+import { Lock } from "lucide-react";
 
 type PendingReview = {
   id: string;
@@ -13,6 +14,7 @@ type PendingReview = {
 };
 
 const fnUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reviews-admin`;
+const ADMIN_PASSWORD = "Luziishere";
 
 async function postAdmin<T>(adminKey: string, body: unknown) {
   const res = await fetch(fnUrl, {
@@ -33,11 +35,23 @@ async function postAdmin<T>(adminKey: string, body: unknown) {
 
 export default function AdminReviews() {
   const { toast } = useToast();
+  const [password, setPassword] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminKey, setAdminKey] = useState("");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<PendingReview[]>([]);
 
   const canUse = useMemo(() => adminKey.trim().length > 0, [adminKey]);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      toast({ title: "Welcome!", description: "Access granted." });
+    } else {
+      toast({ title: "Invalid password", description: "Please try again.", variant: "destructive" });
+    }
+  };
 
   const loadPending = async () => {
     if (!canUse) return;
@@ -65,6 +79,52 @@ export default function AdminReviews() {
       setLoading(false);
     }
   };
+
+  // Password gate
+  if (!isAuthenticated) {
+    return (
+      <main className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <div className="container max-w-md">
+          <form onSubmit={handleLogin} className="rounded-3xl border border-border/70 bg-card/70 p-8 shadow-elevated backdrop-blur-md">
+            <div className="flex justify-center mb-6">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-hero shadow-glow">
+                <Lock className="h-7 w-7 text-primary-foreground" />
+              </div>
+            </div>
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-center">Admin Access</h1>
+            <p className="mt-2 text-sm text-muted-foreground text-center">
+              Enter the password to access the admin panel.
+            </p>
+            <div className="mt-6 space-y-4">
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+                className="bg-background/40"
+                autoFocus
+              />
+              <Button
+                type="submit"
+                className="w-full bg-hero text-primary-foreground shadow-glow hover:shadow-elevated hover:brightness-110"
+              >
+                Unlock
+              </Button>
+            </div>
+            <div className="mt-6 text-center">
+              <Button
+                asChild
+                variant="link"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <a href="/">← Back to site</a>
+              </Button>
+            </div>
+          </form>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background text-foreground">

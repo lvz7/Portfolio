@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Code2, Users, Wrench } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
+import { FaDiscord } from "react-icons/fa";
 import lyrpBanner from "@/assets/lyrp-banner.png";
 import lyrpLogo from "@/assets/lyrp-logo.png";
 
@@ -65,6 +66,7 @@ export default function LYRPSection() {
                 className="bg-[hsl(var(--brand-lyrp))] text-white shadow-[var(--shadow-glow-lyrp)] hover:brightness-110"
               >
                 <a href="https://discord.gg/J4hwPPwSbP" target="_blank" rel="noopener noreferrer">
+                  <FaDiscord className="h-4 w-4" />
                   Join Discord
                 </a>
               </Button>

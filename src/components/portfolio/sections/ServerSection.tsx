@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Code2, Users, Wrench } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
+import { FaDiscord } from "react-icons/fa";
 import { SiTiktok, SiYoutube } from "react-icons/si";
 import lgvrpBanner from "@/assets/lgvrp-banner.png";
 import lgvrpLogo from "@/assets/lgvrp-logo.png";
@@ -62,6 +63,7 @@ export default function ServerSection() {
                 className="bg-hero text-primary-foreground shadow-glow hover:shadow-elevated hover:brightness-110"
               >
                 <a href="https://discord.gg/gjbQAQC88W" target="_blank" rel="noopener noreferrer">
+                  <FaDiscord className="h-4 w-4" />
                   Join Discord
                 </a>
               </Button>

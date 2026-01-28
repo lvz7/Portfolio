@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { motion, useReducedMotion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
+import { FaDiscord } from "react-icons/fa";
 import luziStudiosLogo from "@/assets/luzi-studios-logo.png";
 import luziStudiosBanner from "@/assets/luzi-studios-banner.png";
 
@@ -67,6 +68,7 @@ export default function LuziStudiosSection() {
               className="bg-[hsl(var(--brand-studio))] text-white shadow-[var(--shadow-glow-studio)] hover:brightness-110"
             >
               <a href="https://discord.gg/Z9ABvJRYW7" target="_blank" rel="noopener noreferrer">
+                <FaDiscord className="h-4 w-4" />
                 Join Luzi Studios Discord
               </a>
             </Button>
