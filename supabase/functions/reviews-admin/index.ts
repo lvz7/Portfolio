@@ -1,4 +1,4 @@
-// Lovable Cloud function: approve/list design reviews
+// Lovable Cloud function: approve/list design reviews & view contact submissions
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -9,7 +9,10 @@ const corsHeaders = {
 
 type ActionBody =
   | { action: "list_pending" }
-  | { action: "approve"; id: string };
+  | { action: "approve"; id: string }
+  | { action: "reject"; id: string }
+  | { action: "list_contacts" }
+  | { action: "mark_read"; id: string };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -32,6 +35,7 @@ Deno.serve(async (req) => {
 
     const body = (await req.json().catch(() => ({}))) as Partial<ActionBody>;
 
+    // List pending reviews
     if (body.action === "list_pending") {
       const { data, error } = await supabase
         .from("reviews")
@@ -46,6 +50,7 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Approve a review
     if (body.action === "approve") {
       const id = typeof (body as any)?.id === "string" ? (body as any).id : "";
       if (!id || id.length > 80) {
@@ -56,6 +61,58 @@ Deno.serve(async (req) => {
       }
 
       const { error } = await supabase.from("reviews").update({ approved: true }).eq("id", id);
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+    }
+
+    // Reject (delete) a review
+    if (body.action === "reject") {
+      const id = typeof (body as any)?.id === "string" ? (body as any).id : "";
+      if (!id || id.length > 80) {
+        return new Response(JSON.stringify({ error: "Invalid id" }), {
+          status: 400,
+          headers: { ...corsHeaders, "content-type": "application/json" },
+        });
+      }
+
+      const { error } = await supabase.from("reviews").delete().eq("id", id);
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+    }
+
+    // List contact submissions
+    if (body.action === "list_contacts") {
+      const { data, error } = await supabase
+        .from("contact_submissions")
+        .select("id,name,contact,details,created_at,read")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return new Response(JSON.stringify({ contacts: data ?? [] }), {
+        status: 200,
+        headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+    }
+
+    // Mark contact as read
+    if (body.action === "mark_read") {
+      const id = typeof (body as any)?.id === "string" ? (body as any).id : "";
+      if (!id || id.length > 80) {
+        return new Response(JSON.stringify({ error: "Invalid id" }), {
+          status: 400,
+          headers: { ...corsHeaders, "content-type": "application/json" },
+        });
+      }
+
+      const { error } = await supabase.from("contact_submissions").update({ read: true }).eq("id", id);
       if (error) throw error;
 
       return new Response(JSON.stringify({ ok: true }), {

@@ -74,26 +74,15 @@ export default function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Button
-            asChild
-            variant="default"
-            size="sm"
-            className="hidden bg-hero text-primary-foreground shadow-glow hover:shadow-elevated hover:brightness-110 sm:inline-flex"
-          >
-            <a href="#contact">Commission me</a>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-border hover:bg-card/75 md:hidden"
-            aria-label="Open menu"
-            onClick={() => setOpen((v) => !v)}
-          >
-            <Menu />
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-border hover:bg-card/75 md:hidden"
+          aria-label="Open menu"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <Menu />
+        </Button>
       </div>
 
       {open && (
