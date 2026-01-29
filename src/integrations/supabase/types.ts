@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      contact_submissions: {
+        Row: {
+          contact: string
+          created_at: string
+          details: string
+          id: string
+          name: string
+          read: boolean
+        }
+        Insert: {
+          contact: string
+          created_at?: string
+          details: string
+          id?: string
+          name: string
+          read?: boolean
+        }
+        Update: {
+          contact?: string
+          created_at?: string
+          details?: string
+          id?: string
+          name?: string
+          read?: boolean
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           approved: boolean
