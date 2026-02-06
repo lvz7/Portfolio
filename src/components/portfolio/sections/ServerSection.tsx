@@ -62,7 +62,7 @@ export default function ServerSection() {
                 variant="default"
                 className="bg-hero text-primary-foreground shadow-glow hover:shadow-elevated hover:brightness-110"
               >
-                <a href="https://discord.gg/gjbQAQC88W" target="_blank" rel="noopener noreferrer">
+                <a href="https://discord.gg/lgrp" target="_blank" rel="noopener noreferrer">
                   <FaDiscord className="h-4 w-4" />
                   Join Discord
                 </a>
