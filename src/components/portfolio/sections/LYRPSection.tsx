@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { FaDiscord } from "react-icons/fa";
 import lyrpBanner from "@/assets/lyrp-banner.png";
 import lyrpLogo from "@/assets/lyrp-logo.png";
+import { useDiscordMemberCount } from "@/hooks/useDiscordMemberCount";
 
 const bullets = [
   { icon: Users, title: "Community-first", desc: "Rules, roles, onboarding — smooth experiences matter." },
@@ -14,6 +15,7 @@ const bullets = [
 
 export default function LYRPSection() {
   const reduceMotion = useReducedMotion();
+  const memberCount = useDiscordMemberCount("1464600314882560299");
 
   return (
     <section id="lyrp" className="border-t border-border">
@@ -41,7 +43,12 @@ export default function LYRPSection() {
                 alt="LYRP Logo"
                 className="h-16 w-16 rounded-full border-2 border-[hsl(var(--brand-lyrp))] shadow-[var(--shadow-glow-lyrp)]"
               />
-              <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">LYRP</h2>
+              <div>
+                <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">LYRP</h2>
+                {memberCount && (
+                  <p className="text-xs text-muted-foreground/60 mt-0.5">{memberCount} members online</p>
+                )}
+              </div>
             </div>
             <p className="mt-3 text-muted-foreground">
               Luzi's Young Street Ontario Roleplay — a Roblox roleplay server I'm building with passion.

@@ -6,6 +6,7 @@ import { FaDiscord } from "react-icons/fa";
 import { SiTiktok, SiYoutube } from "react-icons/si";
 import lgvrpBanner from "@/assets/lgvrp-banner.png";
 import lgvrpLogo from "@/assets/lgvrp-logo.png";
+import { useDiscordMemberCount } from "@/hooks/useDiscordMemberCount";
 
 const bullets = [
   { icon: Users, title: "Community-first", desc: "Rules, roles, onboarding — smooth experiences matter." },
@@ -15,6 +16,7 @@ const bullets = [
 
 export default function ServerSection() {
   const reduceMotion = useReducedMotion();
+  const memberCount = useDiscordMemberCount("1325044969743974521");
 
   return (
     <section id="lgvrp" className="border-t border-border">
@@ -42,7 +44,12 @@ export default function ServerSection() {
                 alt="LGVRP Logo"
                 className="h-16 w-16 rounded-full border-2 border-primary shadow-glow"
               />
-              <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">LGVRP</h2>
+              <div>
+                <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">LGVRP</h2>
+                {memberCount && (
+                  <p className="text-xs text-muted-foreground/60 mt-0.5">{memberCount} members online</p>
+                )}
+              </div>
             </div>
             <p className="mt-3 text-muted-foreground">
               I run LGVRP and I'm always building new systems and improving the experience.
