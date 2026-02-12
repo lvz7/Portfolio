@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 function roundDown(n: number, step = 10): string {
   const rounded = Math.floor(n / step) * step;
   return `${rounded}+`;
 }
 
-interface DiscordCounts {
+export interface DiscordCounts {
   online: string;
   members: string | null;
 }
@@ -16,18 +17,16 @@ export function useDiscordMemberCount(guildId: string) {
   useEffect(() => {
     let cancelled = false;
 
-    // Fetch both widget.json (for online) and the embed endpoint (for total)
-    Promise.all([
-      fetch(`https://discord.com/api/guilds/${guildId}/widget.json`).then(r => r.json()).catch(() => null),
-      fetch(`https://discord.com/api/v9/guilds/${guildId}/widget.json`).then(r => r.json()).catch(() => null),
-    ]).then(([widget]) => {
-      if (cancelled || !widget) return;
-      const online = widget.presence_count ?? widget.members?.length ?? 0;
-      setCounts({
-        online: roundDown(online),
-        members: null, // Discord widget API doesn't expose total member count
-      });
-    });
+    supabase.functions
+      .invoke("discord-members", { body: { guild_id: guildId } })
+      .then(({ data, error }) => {
+        if (cancelled || error || !data) return;
+        setCounts({
+          online: data.online != null ? roundDown(data.online) : "0+",
+          members: data.members != null ? roundDown(data.members) : null,
+        });
+      })
+      .catch(() => {});
 
     return () => { cancelled = true; };
   }, [guildId]);
