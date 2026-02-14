@@ -46,18 +46,10 @@ export default function LYRPSection() {
               <div>
                 <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">LYRP</h2>
                 {memberCount && (
-                  <div className="flex items-center gap-3 mt-0.5">
-                    {memberCount.members && (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground/50">
-                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/40" />
-                        {memberCount.members} members
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground/50">
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      {memberCount.online} online
-                    </span>
-                  </div>
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground/50 mt-0.5">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    {memberCount.online} online
+                  </span>
                 )}
               </div>
             </div>

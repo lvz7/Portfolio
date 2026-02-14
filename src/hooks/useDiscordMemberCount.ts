@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 function roundDown(n: number, step = 10): string {
   const rounded = Math.floor(n / step) * step;
@@ -8,7 +7,6 @@ function roundDown(n: number, step = 10): string {
 
 export interface DiscordCounts {
   online: string;
-  members: string | null;
 }
 
 export function useDiscordMemberCount(guildId: string) {
@@ -17,13 +15,15 @@ export function useDiscordMemberCount(guildId: string) {
   useEffect(() => {
     let cancelled = false;
 
-    supabase.functions
-      .invoke("discord-members", { body: { guild_id: guildId } })
-      .then(({ data, error }) => {
-        if (cancelled || error || !data) return;
+    fetch(`https://discord.com/api/guilds/${guildId}/widget.json`)
+      .then((res) => {
+        if (!res.ok) throw new Error("widget disabled");
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
         setCounts({
-          online: data.online != null ? roundDown(data.online) : "0+",
-          members: data.members != null ? roundDown(data.members) : null,
+          online: data.presence_count != null ? roundDown(data.presence_count) : "0+",
         });
       })
       .catch(() => {});
