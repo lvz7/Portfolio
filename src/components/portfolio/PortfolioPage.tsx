@@ -32,10 +32,18 @@ export default function PortfolioPage() {
       </main>
 
       <footer className="border-t border-border">
-        <div className="container py-8">
+        <div className="container py-8 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Luzi. Designs • Development • Communities
           </p>
+          <a
+            href="https://luzi-creative-hub.lovable.app/admin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
+          >
+            Admin
+          </a>
         </div>
       </footer>
     </div>
