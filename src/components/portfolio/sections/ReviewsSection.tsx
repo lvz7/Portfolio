@@ -5,9 +5,30 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+const COOLDOWN_KEY = "luzi_review_cooldown";
+const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // 1 week
+
+function isOnCooldown(): boolean {
+  const last = localStorage.getItem(COOLDOWN_KEY);
+  if (!last) return false;
+  return Date.now() - Number(last) < COOLDOWN_MS;
+}
+
+function setCooldown() {
+  localStorage.setItem(COOLDOWN_KEY, String(Date.now()));
+}
+
+function cooldownRemaining(): string {
+  const last = Number(localStorage.getItem(COOLDOWN_KEY) || "0");
+  const diff = COOLDOWN_MS - (Date.now() - last);
+  if (diff <= 0) return "";
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  return `${days} day${days !== 1 ? "s" : ""}`;
+}
 
 const reviewSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(60, "Keep name under 60 chars"),
@@ -52,6 +73,7 @@ function Stars({ value }: { value: number }) {
 }
 
 export default function ReviewsSection() {
+  const [onCooldown, setOnCooldown] = useState(isOnCooldown());
   const { toast } = useToast();
 
   const defaultValues = useMemo<ReviewFormValues>(
@@ -79,6 +101,12 @@ export default function ReviewsSection() {
   });
 
   const onSubmit = async (values: ReviewFormValues) => {
+    if (isOnCooldown()) {
+      setOnCooldown(true);
+      toast({ title: "Cooldown active", description: `You can submit again in ${cooldownRemaining()}.`, variant: "destructive" });
+      return;
+    }
+
     const parsed = reviewSchema.safeParse(values);
     if (!parsed.success) return;
 
@@ -87,23 +115,19 @@ export default function ReviewsSection() {
       rating: parsed.data.rating,
       design: parsed.data.design ? parsed.data.design : null,
       body: parsed.data.body,
+      approved: true,
     };
 
     const { error } = await supabase.from("reviews").insert(payload);
     if (error) {
-      toast({
-        title: "Couldn’t submit review",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Couldn't submit review", description: error.message, variant: "destructive" });
       return;
     }
 
+    setCooldown();
+    setOnCooldown(true);
     form.reset(defaultValues);
-    toast({
-      title: "Review submitted",
-      description: "Thanks! It will appear once approved.",
-    });
+    toast({ title: "Review submitted", description: "Thanks for your review!" });
     void refetch();
   };
 
@@ -114,17 +138,9 @@ export default function ReviewsSection() {
           <div>
             <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Reviews</h2>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              Leave a quick review for your design. Reviews show up after I approve them.
+              Leave a quick review for your design.
             </p>
           </div>
-
-          <Button
-            asChild
-            variant="outline"
-            className="mt-4 bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-border hover:bg-card/75 md:mt-0"
-          >
-            <a href="/admin">Admin approve</a>
-          </Button>
         </div>
 
         <div className="mt-10 grid gap-4 lg:grid-cols-[1fr_1fr]">
@@ -201,11 +217,14 @@ export default function ReviewsSection() {
               <Button
                 type="submit"
                 variant="default"
+                disabled={onCooldown}
                 className="bg-hero text-primary-foreground shadow-glow hover:shadow-elevated hover:brightness-110"
               >
-                Submit review
+                {onCooldown ? `Cooldown (${cooldownRemaining()})` : "Submit review"}
               </Button>
-              <p className="text-xs text-muted-foreground">No verification yet — keep it honest.</p>
+              <p className="text-xs text-muted-foreground">
+                {onCooldown ? "You can submit again after the cooldown." : "1 review per week — keep it honest."}
+              </p>
             </div>
           </form>
 
@@ -219,7 +238,7 @@ export default function ReviewsSection() {
               {isLoading ? (
                 <p className="text-sm text-muted-foreground">Loading…</p>
               ) : (data?.length ?? 0) === 0 ? (
-                <p className="text-sm text-muted-foreground">No approved reviews yet.</p>
+                <p className="text-sm text-muted-foreground">No reviews yet.</p>
               ) : (
                 data?.map((r) => (
                   <article
