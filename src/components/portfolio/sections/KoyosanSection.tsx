@@ -58,9 +58,10 @@ export default function KoyosanSection() {
                   alt="Koyosan, Japan Banner"
                   className="w-full object-contain"
                 />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--brand-koyosan))] shadow-[var(--shadow-glow-koyosan)] group-hover:scale-110 transition-transform">
-                    <Play className="h-7 w-7 text-white ml-1" fill="white" />
+                <div className="absolute bottom-4 right-4 flex items-center gap-2 cursor-pointer group" onClick={handlePlay}>
+                  <span className="text-sm font-medium text-white drop-shadow-md">Trailer</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--brand-koyosan))] shadow-[var(--shadow-glow-koyosan)] group-hover:scale-110 transition-transform">
+                    <Play className="h-4 w-4 text-white ml-0.5" fill="white" />
                   </div>
                 </div>
               </motion.div>
