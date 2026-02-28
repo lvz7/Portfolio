@@ -6,12 +6,11 @@ import luziPfp from "@/assets/luzi-pfp.png";
 
 const links = [
   { label: "Services", href: "#services" },
-  { label: "Gallery", href: "#gallery" },
   { label: "Luzi Studios", href: "#studio" },
   { label: "LGVRP", href: "#lgvrp" },
   { label: "LYRP", href: "#lyrp" },
+  { label: "Koyosan", href: "#koyosan" },
   { label: "Reviews", href: "#reviews" },
-  { label: "Contact", href: "#contact" },
 ] as const;
 
 function useActiveAnchor(ids: string[]) {
@@ -40,7 +39,7 @@ function useActiveAnchor(ids: string[]) {
 }
 
 export default function SiteHeader() {
-  const ids = useMemo(() => ["services", "gallery", "studio", "lgvrp", "lyrp", "reviews", "contact"], []);
+  const ids = useMemo(() => ["services", "studio", "lgvrp", "lyrp", "koyosan", "reviews"], []);
   const active = useActiveAnchor(ids);
   const [open, setOpen] = useState(false);
 

@@ -77,6 +77,7 @@ export default function KoyosanSection() {
                   ref={videoRef}
                   src="/videos/koyosan-trailer.mov"
                   controls
+                  autoPlay
                   playsInline
                   onEnded={handleEnded}
                   className="w-full"
