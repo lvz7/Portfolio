@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Car, Gamepad2, Map, Users } from "lucide-react";
-import { FaDiscord } from "react-icons/fa";
+import { FaDiscord, FaTiktok } from "react-icons/fa";
 import { SiRoblox } from "react-icons/si";
 import { motion, useReducedMotion } from "framer-motion";
 import koyosanBanner from "@/assets/koyosan-banner.png";
@@ -31,6 +31,24 @@ export default function KoyosanSection() {
             src={koyosanBanner}
             alt="Koyosan, Japan Banner"
             className="w-full object-contain"
+          />
+        </motion.div>
+
+        {/* Trailer */}
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-10% 0px" }}
+          transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+          className="mb-10 overflow-hidden rounded-3xl border border-[hsl(var(--brand-koyosan-muted))] shadow-[var(--shadow-glow-koyosan)]"
+        >
+          <video
+            src="/videos/koyosan-trailer.mov"
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full"
+            poster={koyosanBanner}
           />
         </motion.div>
 
@@ -79,6 +97,16 @@ export default function KoyosanSection() {
                 <a href="https://www.roblox.com/communities/34391984/Koya-Studios#!/about" target="_blank" rel="noopener noreferrer">
                   <SiRoblox className="h-4 w-4" />
                   Roblox Community
+                </a>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-[hsl(var(--brand-koyosan)/0.4)] hover:bg-card/75 before:bg-[radial-gradient(ellipse_at_center,hsl(var(--brand-koyosan)/0.4),transparent_70%)]"
+              >
+                <a href="https://www.tiktok.com/@koyasanjapan" target="_blank" rel="noopener noreferrer">
+                  <FaTiktok className="h-4 w-4" />
+                  TikTok
                 </a>
               </Button>
             </div>
