@@ -82,7 +82,7 @@ export default function ServerSection() {
                 variant="outline"
                 className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-border hover:bg-card/75"
               >
-                <a href="https://www.tiktok.com/@luzisgvrp" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                <a href="https://www.tiktok.com/@ruralville" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                   <SiTiktok className="h-4 w-4" />
                   TikTok
                 </a>
