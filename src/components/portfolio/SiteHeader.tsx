@@ -54,7 +54,7 @@ export default function SiteHeader() {
           />
           <div className="leading-tight">
             <div className="font-display text-sm font-semibold tracking-wide">Luzi</div>
-            <div className="text-xs text-muted-foreground">Designs • LGVRP • LYRP</div>
+            <div className="text-xs text-muted-foreground">Designs • Ruralville • LYRP</div>
           </div>
         </a>
 

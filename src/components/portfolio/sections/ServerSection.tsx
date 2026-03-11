@@ -111,7 +111,7 @@ export default function ServerSection() {
                 className="rounded-3xl border border-border/70 bg-card/70 p-6 shadow-elevated backdrop-blur-md"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-hero shadow-glow">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[hsl(var(--brand-ruralville))] shadow-[var(--shadow-glow-ruralville)]">
                     <b.icon className="h-5 w-5 text-primary-foreground" />
                   </div>
                   <div>

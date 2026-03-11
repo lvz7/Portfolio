@@ -70,6 +70,7 @@ All colors MUST be HSL.
     --shadow-glow-lyrp: 0 18px 60px -18px hsl(var(--brand-lyrp) / 0.5);
     --shadow-glow-studio: 0 18px 60px -18px hsl(var(--brand-studio) / 0.4);
     --shadow-glow-koyosan: 0 18px 60px -18px hsl(var(--brand-koyosan) / 0.5);
+    --shadow-glow-ruralville: 0 18px 60px -18px hsl(var(--brand-ruralville) / 0.5);
 
     --font-sans: ui-sans-serif;
     --font-display: ui-sans-serif;
