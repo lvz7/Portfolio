@@ -27,11 +27,11 @@ export default function ServerSection() {
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-10% 0px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mb-10 overflow-hidden rounded-3xl border border-border/70 shadow-glow"
+          className="mb-10 overflow-hidden rounded-3xl border border-border/70 shadow-[var(--shadow-glow-ruralville)]"
         >
           <img
-            src={lgvrpBanner}
-            alt="LGVRP Banner"
+            src={ruralvilleBanner}
+            alt="Ruralville Banner"
             className="w-full object-contain"
           />
         </motion.div>
