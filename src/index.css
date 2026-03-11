@@ -54,6 +54,10 @@ All colors MUST be HSL.
     /* Koyosan = #ff3962 pink-coral */
     --brand-koyosan: 346 100% 61%;
     --brand-koyosan-muted: 346 40% 20%;
+    /* Ruralville = #268F5D green / #DFCF8F beige */
+    --brand-ruralville: 152 58% 36%;
+    --brand-ruralville-accent: 48 53% 72%;
+    --brand-ruralville-muted: 152 30% 18%;
 
     --gradient-hero: radial-gradient(1200px 600px at var(--mx, 30%) var(--my, 20%), hsl(var(--brand) / 0.28), transparent 58%),
       radial-gradient(900px 500px at 80% 40%, hsl(var(--brand-2) / 0.24), transparent 62%),
