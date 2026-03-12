@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Brush, Code2, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import luziPfp from "@/assets/luzi-pfp.png";
-import lgvrpLogo from "@/assets/lgvrp-logo.png";
+import ruralvilleLogo from "@/assets/ruralville-logo.png";
 import lyrpLogo from "@/assets/lyrp-logo.png";
 import koyosanLogo from "@/assets/koyosan-logo.png";
 
@@ -57,7 +57,7 @@ export default function HeroSection() {
               className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg"
             >
               I design profile pictures and banners, and I love developing and improving communities — especially my
-              LGVRP and LYRP servers.
+              Ruralville and LYRP servers.
             </motion.p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -104,12 +104,12 @@ export default function HeroSection() {
                 <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-muted-foreground">Currently building</div>
-                  <div className="mt-1 font-display text-lg font-semibold">LGVRP, LYRP & Koyosan</div>
+                  <div className="mt-1 font-display text-lg font-semibold">Ruralville, LYRP & Koyosan</div>
                 </div>
                 <div className="flex -space-x-3">
                   <img
-                    src={lgvrpLogo}
-                    alt="LGVRP"
+                    src={ruralvilleLogo}
+                    alt="Ruralville"
                     className="h-12 w-12 rounded-full border-2 border-primary shadow-glow object-cover"
                   />
                   <img
