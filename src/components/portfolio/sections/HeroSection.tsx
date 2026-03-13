@@ -56,8 +56,8 @@ export default function HeroSection() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
               className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg"
             >
-              I design profile pictures and banners, and I love developing and improving communities — especially my
-              Ruralville and LYRP servers.
+              I make PFPs, banners, and all kinds of graphics. I also spend a lot of my time working on
+              Ruralville and LYRP — two servers I run and keep growing.
             </motion.p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
