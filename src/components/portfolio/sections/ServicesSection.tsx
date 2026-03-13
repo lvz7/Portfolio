@@ -7,7 +7,7 @@ const services = [
   {
     icon: Brush,
     title: "Profile Pictures",
-    desc: "Clean icons, mascots, and stylized portraits that read well at small sizes.",
+    desc: "Icons, mascots, stylized portraits — stuff that looks good even tiny.",
     tags: ["High contrast", "Readable"],
   },
   {
