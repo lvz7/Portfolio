@@ -25,7 +25,7 @@ const services = [
   {
     icon: Palette,
     title: "Server Visuals",
-    desc: "UI style direction and assets for roleplay servers (icons, panels, splash screens).",
+    desc: "Icons, panels, splash screens — all the visual stuff your server needs.",
     tags: ["Systems", "Polish"],
   },
 ] as const;
