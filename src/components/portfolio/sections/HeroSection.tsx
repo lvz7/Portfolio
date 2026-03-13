@@ -126,9 +126,9 @@ export default function HeroSection() {
               </div>
 
               <div className="mt-6 grid gap-3">
-                {[
-                  { k: "Design style", v: "Clean + flashy" },
-                  { k: "Delivery", v: "Fast & friendly" },
+                 {[
+                   { k: "Style", v: "Clean but flashy" },
+                   { k: "Turnaround", v: "Pretty fast" },
                   { k: "Focus", v: "Community + systems" },
                 ].map((row) => (
                   <div
