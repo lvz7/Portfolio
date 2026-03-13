@@ -54,7 +54,7 @@ export default function LYRPSection() {
               </div>
             </div>
             <p className="mt-3 text-muted-foreground">
-              Luzi's Young Street Ontario Roleplay — a Roblox roleplay server I'm building with passion.
+              Luzi's Young Street Ontario Roleplay — a Roblox RP server I'm putting a lot of work into.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">

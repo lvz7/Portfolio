@@ -55,7 +55,7 @@ export default function ServerSection() {
               </div>
             </div>
             <p className="mt-3 text-muted-foreground">
-              I run Ruralville and I'm always building new systems and improving the experience.
+              I run Ruralville — always adding new stuff and making things better.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">

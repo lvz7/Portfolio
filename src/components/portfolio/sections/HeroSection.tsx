@@ -143,7 +143,7 @@ export default function HeroSection() {
 
               <div className="mt-6 rounded-2xl border border-border/60 bg-background/40 p-4">
                 <p className="text-sm text-muted-foreground">
-                 Are you in the need of a new Banner, Profile Picture, etc.? Come have a look!
+                 Need a new banner, PFP, or something else? Hit me up!
                 </p>
               </div>
             </div>
