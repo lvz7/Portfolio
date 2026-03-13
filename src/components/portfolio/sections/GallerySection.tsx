@@ -44,10 +44,10 @@ export default function GallerySection() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">
-            My Best Designs
+            Some of my work
           </h2>
           <p className="mt-2 max-w-2xl text-muted-foreground">
-            A showcase of my favorite work. Swipe to see more!
+            Here's a few of my favorites. Swipe through!
           </p>
         </motion.div>
 

@@ -7,25 +7,25 @@ const services = [
   {
     icon: Brush,
     title: "Profile Pictures",
-    desc: "Clean icons, mascots, and stylized portraits that read well at small sizes.",
+    desc: "Icons, mascots, stylized portraits — stuff that looks good even tiny.",
     tags: ["High contrast", "Readable"],
   },
   {
     icon: Layout,
     title: "Banners & Headers",
-    desc: "Social + server banners with depth, lighting, and a strong focal point.",
+    desc: "Server and social banners with depth, glow, and a solid focal point.",
     tags: ["Layered", "Glow"],
   },
   {
     icon: ImageIcon,
     title: "Thumbnails",
-    desc: "Punchy layouts that stand out in a feed and match your vibe.",
+    desc: "Eye-catching layouts that don't get lost in a feed.",
     tags: ["Bold type", "Clarity"],
   },
   {
     icon: Palette,
     title: "Server Visuals",
-    desc: "UI style direction and assets for roleplay servers (icons, panels, splash screens).",
+    desc: "Icons, panels, splash screens — all the visual stuff your server needs.",
     tags: ["Systems", "Polish"],
   },
 ] as const;
@@ -40,7 +40,7 @@ export default function ServicesSection() {
           <div>
             <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Services</h2>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              I keep things clean, colorful, and readable — whether it’s a profile icon or a full banner kit.
+              Everything I make is clean, colorful, and easy to read — no matter the size.
             </p>
           </div>
 

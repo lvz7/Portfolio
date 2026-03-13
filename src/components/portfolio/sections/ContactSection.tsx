@@ -72,7 +72,7 @@ export default function ContactSection() {
           <div>
             <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Contact</h2>
             <p className="mt-2 max-w-xl text-muted-foreground">
-              Tell me what you need (style, colors, theme, deadline). I'll reply with a quick plan.
+              Just tell me what you need — style, colors, deadline. I'll get back to you with a plan.
             </p>
 
             <div className="mt-6 rounded-3xl border border-border/70 bg-card/70 p-6 shadow-elevated backdrop-blur-md">

@@ -33,7 +33,7 @@ export default function HeroSection() {
                 className="h-12 w-12 rounded-full border-2 border-primary shadow-glow object-cover"
               />
               <p className="text-sm text-muted-foreground">
-                Hi, I'm <span className="text-foreground font-medium">Luzi</span> — I make designs and build roleplay servers.
+                Hey, I'm <span className="text-foreground font-medium">Luzi</span> — I do designs and run roleplay servers.
               </p>
             </motion.div>
 
@@ -43,11 +43,11 @@ export default function HeroSection() {
               transition={{ duration: 0.65, ease: "easeOut", delay: 0.05 }}
               className="mt-4 font-display text-4xl font-semibold tracking-tight md:text-6xl"
             >
-              Clean visuals.
-              <br />
-              Fast turnarounds.
-              <br />
-              <span className="text-muted-foreground">Servers that feel alive.</span>
+               Bold designs.
+               <br />
+               Quick delivery.
+               <br />
+               <span className="text-muted-foreground">Communities that actually pop.</span>
             </motion.h1>
 
             <motion.p
@@ -56,8 +56,8 @@ export default function HeroSection() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
               className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg"
             >
-              I design profile pictures and banners, and I love developing and improving communities — especially my
-              Ruralville and LYRP servers.
+              I make PFPs, banners, and all kinds of graphics. I also spend a lot of my time working on
+              Ruralville and LYRP — two servers I run and keep growing.
             </motion.p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -126,9 +126,9 @@ export default function HeroSection() {
               </div>
 
               <div className="mt-6 grid gap-3">
-                {[
-                  { k: "Design style", v: "Clean + flashy" },
-                  { k: "Delivery", v: "Fast & friendly" },
+                 {[
+                   { k: "Style", v: "Clean but flashy" },
+                   { k: "Turnaround", v: "Pretty fast" },
                   { k: "Focus", v: "Community + systems" },
                 ].map((row) => (
                   <div
@@ -143,7 +143,7 @@ export default function HeroSection() {
 
               <div className="mt-6 rounded-2xl border border-border/60 bg-background/40 p-4">
                 <p className="text-sm text-muted-foreground">
-                 Are you in the need of a new Banner, Profile Picture, etc.? Come have a look!
+                 Need a new banner, PFP, or something else? Hit me up!
                 </p>
               </div>
             </div>

@@ -9,9 +9,9 @@ import koyosanBanner from "@/assets/koyosan-banner.png";
 import koyosanLogo from "@/assets/koyosan-logo.png";
 
 const bullets = [
-  { icon: Map, title: "Map Building", desc: "Crafting immersive Japanese environments and detailed cityscapes." },
-  { icon: Car, title: "Driving Experience", desc: "Smooth driving mechanics in a beautiful Roblox world." },
-  { icon: Users, title: "Roleplay Community", desc: "Building an engaging community for driving and roleplay enthusiasts." },
+  { icon: Map, title: "Map Building", desc: "Making detailed Japanese cities and environments from scratch." },
+  { icon: Car, title: "Driving", desc: "Smooth driving in a good-looking Roblox world." },
+  { icon: Users, title: "RP Community", desc: "A chill spot for people who like driving and roleplay." },
 ] as const;
 
 export default function KoyosanSection() {
@@ -98,7 +98,7 @@ export default function KoyosanSection() {
               <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Koyosan, Japan</h2>
             </div>
             <p className="mt-3 text-muted-foreground">
-              A driving and roleplay game set in Japan — I'm a Map Builder & Co-Owner, crafting immersive experiences on Roblox.
+              A driving and RP game set in Japan — I'm a Map Builder & Co-Owner over there.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">

@@ -9,9 +9,9 @@ import ruralvilleLogo from "@/assets/ruralville-logo.png";
 import { useDiscordMemberCount } from "@/hooks/useDiscordMemberCount";
 
 const bullets = [
-  { icon: Users, title: "Community-first", desc: "Rules, roles, onboarding — smooth experiences matter." },
-  { icon: Wrench, title: "Systems & tuning", desc: "Iteration, balancing, and quality-of-life improvements." },
-  { icon: Code2, title: "Development", desc: "I love building and improving server features." },
+  { icon: Users, title: "Community-first", desc: "Good rules, good roles, smooth onboarding — the basics done right." },
+  { icon: Wrench, title: "Always tweaking", desc: "Constantly balancing stuff and adding QoL changes." },
+  { icon: Code2, title: "Dev work", desc: "I genuinely enjoy coding new features for the server." },
 ] as const;
 
 export default function ServerSection() {
@@ -55,7 +55,7 @@ export default function ServerSection() {
               </div>
             </div>
             <p className="mt-3 text-muted-foreground">
-              I run Ruralville and I'm always building new systems and improving the experience.
+              I run Ruralville — always adding new stuff and making things better.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
