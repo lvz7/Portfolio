@@ -33,7 +33,7 @@ export default function HeroSection() {
                 className="h-12 w-12 rounded-full border-2 border-primary shadow-glow object-cover"
               />
               <p className="text-sm text-muted-foreground">
-                Hi, I'm <span className="text-foreground font-medium">Luzi</span> — I make designs and build roleplay servers.
+                Hey, I'm <span className="text-foreground font-medium">Luzi</span> — I do designs and run roleplay servers.
               </p>
             </motion.div>
 
