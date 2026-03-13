@@ -40,7 +40,7 @@ export default function ServicesSection() {
           <div>
             <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Services</h2>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              I keep things clean, colorful, and readable — whether it’s a profile icon or a full banner kit.
+              Everything I make is clean, colorful, and easy to read — no matter the size.
             </p>
           </div>
 
