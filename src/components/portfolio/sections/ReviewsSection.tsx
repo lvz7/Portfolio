@@ -291,7 +291,7 @@ export default function ReviewsSection() {
                 {onCooldown ? `Cooldown (${cooldownRemaining()})` : "Submit review"}
               </Button>
               <p className="text-xs text-muted-foreground">
-                {onCooldown ? "You can submit again after the cooldown." : "1 review per week — keep it honest."}
+                {onCooldown ? "You can submit again after the cooldown." : ""}
               </p>
             </div>
           </form>
@@ -320,7 +320,30 @@ export default function ReviewsSection() {
                           <div className="text-xs text-muted-foreground">{r.design}</div>
                         ) : null}
                       </div>
-                      <Stars value={r.rating} />
+                      <div className="flex items-center gap-2">
+                        <Stars value={r.rating} />
+                        {isOwner && (
+                          <button
+                            onClick={async () => {
+                              if (!confirm("Delete this review?")) return;
+                              try {
+                                const res = await fetch(FN_URL, {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ action: "delete_review", id: r.id }),
+                                });
+                                const json = await res.json();
+                                if (!res.ok) throw new Error(json.error || "Failed");
+                                void refetch();
+                              } catch {}
+                            }}
+                            className="text-xs text-destructive/60 hover:text-destructive transition-colors"
+                            title="Delete review"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <p className="mt-3 text-sm text-muted-foreground">{r.body}</p>
 
