@@ -67,7 +67,33 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Admin-key protected actions
+    // Delete a review (IP-restricted)
+    if (body.action === "delete_review") {
+      if (!ALLOWED_IPS.includes(clientIp)) {
+        return new Response(JSON.stringify({ error: "Unauthorized IP" }), {
+          status: 403,
+          headers: { ...corsHeaders, "content-type": "application/json" },
+        });
+      }
+      const id = typeof (body as any)?.id === "string" ? (body as any).id : "";
+      if (!id || id.length > 80) {
+        return new Response(JSON.stringify({ error: "Invalid id" }), {
+          status: 400,
+          headers: { ...corsHeaders, "content-type": "application/json" },
+        });
+      }
+
+      const url = Deno.env.get("SUPABASE_URL")!;
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supa = createClient(url, serviceKey);
+      const { error } = await supa.from("reviews").delete().eq("id", id);
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+    }
     const adminKey = req.headers.get("x-admin-key") ?? "";
     const expected = Deno.env.get("REVIEW_ADMIN_KEY") ?? "";
     if (!expected || adminKey !== expected) {
