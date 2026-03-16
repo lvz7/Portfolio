@@ -7,12 +7,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-key",
 };
 
+const ALLOWED_IPS = ["85.0.237.66"];
+
 type ActionBody =
   | { action: "list_pending" }
   | { action: "approve"; id: string }
   | { action: "reject"; id: string }
   | { action: "list_contacts" }
-  | { action: "mark_read"; id: string };
+  | { action: "mark_read"; id: string }
+  | { action: "reply"; id: string; reply: string }
+  | { action: "check_ip" };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -20,6 +24,49 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+                     req.headers.get("cf-connecting-ip") ??
+                     req.headers.get("x-real-ip") ?? "";
+
+    const body = (await req.json().catch(() => ({}))) as Partial<ActionBody>;
+
+    // IP-only actions (no admin key needed)
+    if (body.action === "check_ip") {
+      return new Response(JSON.stringify({ allowed: ALLOWED_IPS.includes(clientIp) }), {
+        status: 200,
+        headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+    }
+
+    if (body.action === "reply") {
+      if (!ALLOWED_IPS.includes(clientIp)) {
+        return new Response(JSON.stringify({ error: "Unauthorized IP" }), {
+          status: 403,
+          headers: { ...corsHeaders, "content-type": "application/json" },
+        });
+      }
+      const id = typeof (body as any)?.id === "string" ? (body as any).id : "";
+      const replyText = typeof (body as any)?.reply === "string" ? (body as any).reply.trim() : "";
+      if (!id || id.length > 80 || !replyText || replyText.length > 500) {
+        return new Response(JSON.stringify({ error: "Invalid id or reply" }), {
+          status: 400,
+          headers: { ...corsHeaders, "content-type": "application/json" },
+        });
+      }
+
+      const url = Deno.env.get("SUPABASE_URL")!;
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supa = createClient(url, serviceKey);
+      const { error } = await supa.from("reviews").update({ reply: replyText }).eq("id", id);
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+    }
+
+    // Admin-key protected actions
     const adminKey = req.headers.get("x-admin-key") ?? "";
     const expected = Deno.env.get("REVIEW_ADMIN_KEY") ?? "";
     if (!expected || adminKey !== expected) {

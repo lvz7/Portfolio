@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -49,6 +49,7 @@ type PublicReview = {
   rating: number;
   design: string | null;
   body: string;
+  reply: string | null;
   created_at: string;
 };
 
@@ -72,9 +73,65 @@ function Stars({ value }: { value: number }) {
   );
 }
 
+const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reviews-admin`;
+
+function ReplyBox({ reviewId, onReplied }: { reviewId: string; onReplied: () => void }) {
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+  const { toast } = useToast();
+
+  const submit = async () => {
+    if (!text.trim()) return;
+    setSending(true);
+    try {
+      const res = await fetch(FN_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reply", id: reviewId, reply: text.trim() }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed");
+      toast({ title: "Reply sent!" });
+      setText("");
+      onReplied();
+    } catch (e: any) {
+      toast({ title: "Couldn't reply", description: e.message, variant: "destructive" });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="mt-3 flex gap-2">
+      <Input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Write a reply…"
+        className="bg-background/40 text-sm"
+        maxLength={500}
+      />
+      <Button size="sm" onClick={submit} disabled={sending || !text.trim()}>
+        Reply
+      </Button>
+    </div>
+  );
+}
+
 export default function ReviewsSection() {
   const [onCooldown, setOnCooldown] = useState(isOnCooldown());
+  const [isOwner, setIsOwner] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetch(FN_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "check_ip" }),
+    })
+      .then((r) => r.json())
+      .then((d) => setIsOwner(d.allowed === true))
+      .catch(() => {});
+  }, []);
 
   const defaultValues = useMemo<ReviewFormValues>(
     () => ({ name: "", rating: 5, design: "", body: "" }),
@@ -96,7 +153,18 @@ export default function ReviewsSection() {
         .order("created_at", { ascending: false })
         .limit(12);
       if (error) throw error;
-      return (data ?? []) as PublicReview[];
+      // Fetch replies separately since the column may not be in generated types yet
+      const ids = (data ?? []).map((r: any) => r.id);
+      if (ids.length === 0) return [] as PublicReview[];
+      const { data: withReplies } = await supabase
+        .from("reviews")
+        .select("id,reply" as any)
+        .in("id", ids);
+      const replyMap = new Map((withReplies ?? []).map((r: any) => [r.id, r.reply]));
+      return (data ?? []).map((r: any) => ({
+        ...r,
+        reply: replyMap.get(r.id) ?? null,
+      })) as PublicReview[];
     },
   });
 
@@ -255,6 +323,17 @@ export default function ReviewsSection() {
                       <Stars value={r.rating} />
                     </div>
                     <p className="mt-3 text-sm text-muted-foreground">{r.body}</p>
+
+                    {r.reply && (
+                      <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-3">
+                        <p className="text-xs font-semibold text-primary mb-1">Luzi</p>
+                        <p className="text-sm text-muted-foreground">{r.reply}</p>
+                      </div>
+                    )}
+
+                    {isOwner && !r.reply && (
+                      <ReplyBox reviewId={r.id} onReplied={() => void refetch()} />
+                    )}
                   </article>
                 ))
               )}
