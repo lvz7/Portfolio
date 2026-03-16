@@ -7,12 +7,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-key",
 };
 
+const ALLOWED_IPS = ["85.0.237.66"];
+
 type ActionBody =
   | { action: "list_pending" }
   | { action: "approve"; id: string }
   | { action: "reject"; id: string }
   | { action: "list_contacts" }
-  | { action: "mark_read"; id: string };
+  | { action: "mark_read"; id: string }
+  | { action: "reply"; id: string; reply: string }
+  | { action: "check_ip" };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
