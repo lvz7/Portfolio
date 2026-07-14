@@ -8,7 +8,7 @@ const links = [
   { label: "Services", href: "#services" },
   { label: "Luzi Studios", href: "#studio" },
   { label: "Ruralville", href: "#lgvrp" },
-  { label: "Hydrox", href: "#hydrox" },
+  { label: "Hydrox Community", href: "#hydrox" },
   { label: "Koyosan", href: "#koyosan" },
   { label: "Reviews", href: "#reviews" },
 ] as const;
