@@ -21,7 +21,7 @@ export default function HydroxSection() {
   const counts = useRobloxPlayers(HYDROX_UNIVERSE_ID);
 
   return (
-    <section id="hydrox" className="border-t border-border">
+    <section id="hydrox" className="border-t border-border bg-white text-slate-900">
       <div className="container py-16 md:py-20">
         {/* Banner */}
         <motion.div
@@ -29,7 +29,7 @@ export default function HydroxSection() {
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-10% 0px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mb-10 overflow-hidden rounded-3xl border border-border/70 shadow-[var(--shadow-glow)]"
+          className="mb-10 overflow-hidden rounded-3xl border border-slate-200 shadow-[0_18px_60px_-18px_rgba(15,23,42,0.2)]"
         >
           <img
             src={hydroxBanner}
@@ -44,25 +44,25 @@ export default function HydroxSection() {
               <img
                 src={hydroxLogo}
                 alt="Hydrox Logo"
-                className="h-16 w-16 rounded-full border-2 border-primary shadow-glow object-cover"
+                className="h-16 w-16 rounded-full border-2 border-slate-900 object-cover"
               />
               <div>
-                <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Hydrox</h2>
+                <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl text-slate-900">Hydrox Community</h2>
                 {counts && (
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground/60 mt-0.5">
+                  <span className="flex items-center gap-1 text-xs text-slate-500 mt-0.5">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     {counts.playing} playing now
                   </span>
                 )}
               </div>
             </div>
-            <p className="mt-3 text-muted-foreground">
-              A driving/car sandbox on Roblox — I'm admin on <span className="text-foreground">Hydrox Sandbox: UK V3</span>. Cars, cruises, and a solid community.
+            <p className="mt-3 text-slate-600">
+              A driving/car sandbox on Roblox — I'm admin on <span className="text-slate-900 font-medium">Hydrox Sandbox: UK V3</span>. Cars, cruises, and a solid community.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
               {["Roblox", "Cars", "Sandbox", "Admin"].map((t) => (
-                <Badge key={t} className="bg-secondary/70" variant="secondary">
+                <Badge key={t} className="bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200" variant="secondary">
                   {t}
                 </Badge>
               ))}
@@ -72,7 +72,7 @@ export default function HydroxSection() {
               <Button
                 asChild
                 variant="default"
-                className="bg-primary text-primary-foreground shadow-glow hover:shadow-elevated hover:brightness-110"
+                className="bg-slate-900 text-white hover:bg-slate-800"
               >
                 <a href="https://www.roblox.com/games/?Keyword=Hydrox%20Sandbox" target="_blank" rel="noopener noreferrer">
                   <SiRoblox className="h-4 w-4" />
@@ -90,15 +90,15 @@ export default function HydroxSection() {
                 whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-20% 0px" }}
                 transition={{ duration: 0.45, ease: "easeOut", delay: idx * 0.05 }}
-                className="rounded-3xl border border-border/70 bg-card/70 p-6 shadow-elevated backdrop-blur-md"
+                className="rounded-3xl border border-slate-200 bg-slate-50 p-6"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary shadow-glow">
-                    <b.icon className="h-5 w-5 text-primary-foreground" />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-900">
+                    <b.icon className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <div className="font-display text-lg font-semibold">{b.title}</div>
-                    <p className="mt-1 text-sm text-muted-foreground">{b.desc}</p>
+                    <div className="font-display text-lg font-semibold text-slate-900">{b.title}</div>
+                    <p className="mt-1 text-sm text-slate-600">{b.desc}</p>
                   </div>
                 </div>
               </motion.div>
