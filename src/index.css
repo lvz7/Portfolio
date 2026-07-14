@@ -9,45 +9,42 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Luzi — baby blue highlights on a deep red studio canvas */
-    --background: 352 45% 7%;
+    /* Luzi — vivid BMW blue on a deep navy canvas */
+    --background: 218 55% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 352 34% 10%;
+    --card: 218 40% 10%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 352 34% 10%;
+    --popover: 218 40% 10%;
     --popover-foreground: 210 40% 98%;
 
-    /* Primary = baby blue */
-    --primary: 198 92% 72%;
-    --primary-foreground: 352 45% 7%;
+    /* Primary = vivid BMW blue */
+    --primary: 208 92% 55%;
+    --primary-foreground: 218 55% 6%;
 
-    --secondary: 350 28% 14%;
+    --secondary: 218 30% 14%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 350 24% 14%;
-    --muted-foreground: 222 16% 70%;
+    --muted: 218 26% 14%;
+    --muted-foreground: 215 20% 72%;
 
-    /* Accent = dark red */
-    --accent: 352 72% 46%;
-    --accent-foreground: 210 40% 98%;
+    /* Accent = brighter cyan-blue */
+    --accent: 198 92% 60%;
+    --accent-foreground: 218 55% 6%;
 
     --destructive: 0 78% 56%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 350 18% 22%;
-    --input: 350 18% 22%;
-    --ring: 198 92% 72%;
+    --border: 218 22% 22%;
+    --input: 218 22% 22%;
+    --ring: 208 92% 55%;
 
     --radius: 0.9rem;
 
-    /* Brand helpers (still semantic) */
-    --brand: 198 92% 72%;
-    --brand-2: 352 72% 46%;
-    /* LYRP = pink-magenta */
-    --brand-lyrp: 320 72% 55%;
-    --brand-lyrp-muted: 320 28% 22%;
+    /* Brand helpers */
+    --brand: 208 92% 55%;
+    --brand-2: 198 92% 60%;
     /* Luzi Studios = grey/white */
     --brand-studio: 220 10% 50%;
     --brand-studio-muted: 220 10% 20%;
@@ -59,15 +56,14 @@ All colors MUST be HSL.
     --brand-ruralville-accent: 48 53% 72%;
     --brand-ruralville-muted: 152 30% 18%;
 
-    --gradient-hero: radial-gradient(1200px 600px at var(--mx, 30%) var(--my, 20%), hsl(var(--brand) / 0.28), transparent 58%),
+    --gradient-hero: radial-gradient(1200px 600px at var(--mx, 30%) var(--my, 20%), hsl(var(--brand) / 0.32), transparent 58%),
       radial-gradient(900px 500px at 80% 40%, hsl(var(--brand-2) / 0.24), transparent 62%),
-      linear-gradient(180deg, hsl(var(--background)), hsl(352 40% 6%));
+      linear-gradient(180deg, hsl(var(--background)), hsl(218 50% 5%));
 
     --gradient-sheen: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.12), transparent);
 
-    --shadow-elevated: 0 18px 60px -18px hsl(352 45% 2% / 0.7);
-    --shadow-glow: 0 18px 60px -18px hsl(var(--brand) / 0.5);
-    --shadow-glow-lyrp: 0 18px 60px -18px hsl(var(--brand-lyrp) / 0.5);
+    --shadow-elevated: 0 18px 60px -18px hsl(218 55% 2% / 0.7);
+    --shadow-glow: 0 18px 60px -18px hsl(var(--brand) / 0.55);
     --shadow-glow-studio: 0 18px 60px -18px hsl(var(--brand-studio) / 0.4);
     --shadow-glow-koyosan: 0 18px 60px -18px hsl(var(--brand-koyosan) / 0.5);
     --shadow-glow-ruralville: 0 18px 60px -18px hsl(var(--brand-ruralville) / 0.5);
@@ -93,34 +89,33 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Keep parity if a dark class is applied */
-    --background: 352 45% 7%;
+    --background: 218 55% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 352 34% 10%;
+    --card: 218 40% 10%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 352 34% 10%;
+    --popover: 218 40% 10%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 198 92% 72%;
-    --primary-foreground: 352 45% 7%;
+    --primary: 208 92% 55%;
+    --primary-foreground: 218 55% 6%;
 
-    --secondary: 350 28% 14%;
+    --secondary: 218 30% 14%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 350 24% 14%;
-    --muted-foreground: 222 16% 70%;
+    --muted: 218 26% 14%;
+    --muted-foreground: 215 20% 72%;
 
-    --accent: 352 72% 46%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 198 92% 60%;
+    --accent-foreground: 218 55% 6%;
 
     --destructive: 0 78% 56%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 350 18% 22%;
-    --input: 350 18% 22%;
-    --ring: 198 92% 72%;
+    --border: 218 22% 22%;
+    --input: 218 22% 22%;
+    --ring: 208 92% 55%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
