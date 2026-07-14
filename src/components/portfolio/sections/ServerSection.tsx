@@ -6,17 +6,15 @@ import { FaDiscord } from "react-icons/fa";
 import { SiTiktok, SiYoutube } from "react-icons/si";
 import ruralvilleBanner from "@/assets/ruralville-banner.png";
 import ruralvilleLogo from "@/assets/ruralville-logo.png";
-import { useDiscordMemberCount } from "@/hooks/useDiscordMemberCount";
 
 const bullets = [
   { icon: Users, title: "Community-first", desc: "Good rules, good roles, smooth onboarding — the basics done right." },
-  { icon: Wrench, title: "Always tweaking", desc: "Constantly balancing stuff and adding QoL changes." },
-  { icon: Code2, title: "Dev work", desc: "I genuinely enjoy coding new features for the server." },
+  { icon: Wrench, title: "Always tweaking", desc: "Constantly balancing and adding QoL changes back when it was live." },
+  { icon: Code2, title: "Dev work", desc: "I coded and shipped new features regularly." },
 ] as const;
 
 export default function ServerSection() {
   const reduceMotion = useReducedMotion();
-  const memberCount = useDiscordMemberCount("1325044969743974521");
 
   return (
     <section id="lgvrp" className="border-t border-border">
@@ -46,16 +44,14 @@ export default function ServerSection() {
               />
               <div>
                 <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Ruralville</h2>
-                {memberCount && (
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground/50 mt-0.5">
-                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    {memberCount.online} online
-                  </span>
-                )}
+                <span className="flex items-center gap-1 text-xs text-muted-foreground/60 mt-0.5">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/40" />
+                  400+ members · archived
+                </span>
               </div>
             </div>
             <p className="mt-3 text-muted-foreground">
-              I run Ruralville — always adding new stuff and making things better.
+              I was the owner of Ruralville when it was active — we hit <span className="text-foreground">400+ members</span> before winding it down.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">

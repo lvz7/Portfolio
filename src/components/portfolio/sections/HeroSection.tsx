@@ -4,7 +4,7 @@ import { ArrowRight, Brush, Code2, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import luziPfp from "@/assets/luzi-pfp.png";
 import ruralvilleLogo from "@/assets/ruralville-logo.png";
-import lyrpLogo from "@/assets/lyrp-logo.png";
+import hydroxLogo from "@/assets/hydrox-logo.png";
 import koyosanLogo from "@/assets/koyosan-logo.png";
 
 const chips = [
@@ -56,8 +56,7 @@ export default function HeroSection() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
               className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg"
             >
-              I make PFPs, banners, and all kinds of graphics. I also spend a lot of my time working on
-              Ruralville and LYRP — two servers I run and keep growing.
+              I make PFPs, banners, and all kinds of graphics. On the side I'm admin on Hydrox and help out on Koyosan — plus I used to own Ruralville.
             </motion.p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -103,24 +102,25 @@ export default function HeroSection() {
             <div className="rounded-3xl border border-border/70 bg-card/70 p-6 shadow-elevated backdrop-blur-md">
                 <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-muted-foreground">Currently building</div>
-                  <div className="mt-1 font-display text-lg font-semibold">Ruralville, LYRP & Koyosan</div>
+                  <div className="text-sm text-muted-foreground">Currently in</div>
+                  <div className="mt-1 font-display text-lg font-semibold">Hydrox & Koyosan</div>
                 </div>
                 <div className="flex -space-x-3">
                   <img
-                    src={ruralvilleLogo}
-                    alt="Ruralville"
+                    src={hydroxLogo}
+                    alt="Hydrox"
                     className="h-12 w-12 rounded-full border-2 border-primary shadow-glow object-cover"
-                  />
-                  <img
-                    src={lyrpLogo}
-                    alt="LYRP"
-                    className="h-12 w-12 rounded-full border-2 border-[hsl(var(--brand-lyrp))] shadow-[var(--shadow-glow-lyrp)] object-cover"
                   />
                   <img
                     src={koyosanLogo}
                     alt="Koyosan"
                     className="h-12 w-12 rounded-full border-2 border-[hsl(var(--brand-koyosan))] shadow-[var(--shadow-glow-koyosan)] object-cover bg-white"
+                  />
+                  <img
+                    src={ruralvilleLogo}
+                    alt="Ruralville (archived)"
+                    className="h-12 w-12 rounded-full border-2 border-[hsl(var(--brand-ruralville))] shadow-[var(--shadow-glow-ruralville)] object-cover opacity-60"
+                    title="Ruralville — archived"
                   />
                 </div>
               </div>

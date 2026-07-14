@@ -8,7 +8,7 @@ const links = [
   { label: "Services", href: "#services" },
   { label: "Luzi Studios", href: "#studio" },
   { label: "Ruralville", href: "#lgvrp" },
-  { label: "LYRP", href: "#lyrp" },
+  { label: "Hydrox", href: "#hydrox" },
   { label: "Koyosan", href: "#koyosan" },
   { label: "Reviews", href: "#reviews" },
 ] as const;
@@ -39,7 +39,7 @@ function useActiveAnchor(ids: string[]) {
 }
 
 export default function SiteHeader() {
-  const ids = useMemo(() => ["services", "studio", "lgvrp", "lyrp", "koyosan", "reviews"], []);
+  const ids = useMemo(() => ["services", "studio", "lgvrp", "hydrox", "koyosan", "reviews"], []);
   const active = useActiveAnchor(ids);
   const [open, setOpen] = useState(false);
 
@@ -54,7 +54,7 @@ export default function SiteHeader() {
           />
           <div className="leading-tight">
             <div className="font-display text-sm font-semibold tracking-wide">Luzi</div>
-            <div className="text-xs text-muted-foreground">Designs • Ruralville • LYRP</div>
+            <div className="text-xs text-muted-foreground">Designs • Ruralville • Hydrox</div>
           </div>
         </a>
 
