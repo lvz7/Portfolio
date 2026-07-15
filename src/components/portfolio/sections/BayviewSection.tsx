@@ -71,11 +71,11 @@ export default function BayviewSection() {
               <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Bayview County, USA</h2>
             </div>
             <p className="mt-3 text-muted-foreground">
-              Bayview County is a realistic Roblox driving and roleplay game inspired by Greenville. It features a large open-world map, interactive jobs, customizable vehicles, and immersive roleplay experiences. While inspired by Greenville, Bayview County has grown into its own unique experience with original locations, gameplay systems, and identity.
+              Bayview County is a realistic Roblox driving and roleplay game inspired by Greenville. It features a large open-world map, interactive jobs, customizable vehicles, and immersive roleplay experiences. While inspired by Greenville, Bayview County has grown into its own unique experience with original locations, gameplay systems, and identity. I'm a moderator on the server.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              {["Roblox", "Driving", "Roleplay", "Open World"].map((t) => (
+              {["Roblox", "Driving", "Roleplay", "Moderator"].map((t) => (
                 <Badge
                   key={t}
                   className="bg-[hsl(var(--brand-bayview-muted))] text-[hsl(var(--brand-bayview))] border border-[hsl(var(--brand-bayview)/0.3)]"
