@@ -29,9 +29,9 @@ All colors MUST be HSL.
     --muted: 218 26% 14%;
     --muted-foreground: 215 20% 72%;
 
-    /* Accent = brighter cyan-blue */
-    --accent: 198 92% 60%;
-    --accent-foreground: 218 55% 6%;
+    /* Accent = green (secondary accent color) */
+    --accent: 142 70% 45%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 78% 56%;
     --destructive-foreground: 210 40% 98%;
@@ -55,6 +55,10 @@ All colors MUST be HSL.
     --brand-ruralville: 152 58% 36%;
     --brand-ruralville-accent: 48 53% 72%;
     --brand-ruralville-muted: 152 30% 18%;
+    /* Bayview County = green accent on blue */
+    --brand-bayview: 142 70% 45%;
+    --brand-bayview-muted: 142 40% 18%;
+
 
     --gradient-hero: radial-gradient(1200px 600px at var(--mx, 30%) var(--my, 20%), hsl(var(--brand) / 0.32), transparent 58%),
       radial-gradient(900px 500px at 80% 40%, hsl(var(--brand-2) / 0.24), transparent 62%),
@@ -107,8 +111,8 @@ All colors MUST be HSL.
     --muted: 218 26% 14%;
     --muted-foreground: 215 20% 72%;
 
-    --accent: 198 92% 60%;
-    --accent-foreground: 218 55% 6%;
+    --accent: 142 70% 45%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 78% 56%;
     --destructive-foreground: 210 40% 98%;
