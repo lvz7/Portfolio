@@ -9,6 +9,7 @@ import bayviewLogo from "@/assets/bayview-logo.png";
 const ROBLOX_URL = "https://www.roblox.com/games/99709766196624/Bayview-County";
 
 const bullets = [
+  { icon: Shield, title: "Moderator", desc: "I help moderate the server and keep things running smooth." },
   { icon: Map, title: "Open-world map", desc: "A big, detailed map inspired by Greenville with its own original locations." },
   { icon: Car, title: "Customizable vehicles", desc: "Loads of cars to drive and make your own." },
   { icon: Users, title: "Interactive jobs & RP", desc: "Jobs, systems, and roleplay experiences built into the world." },
