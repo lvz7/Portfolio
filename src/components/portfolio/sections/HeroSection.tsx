@@ -104,13 +104,18 @@ export default function HeroSection() {
                 <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-muted-foreground">Currently in</div>
-                  <div className="mt-1 font-display text-lg font-semibold">Hydrox & Koyosan</div>
+                  <div className="mt-1 font-display text-lg font-semibold">Hydrox, Bayview & Koyosan</div>
                 </div>
                 <div className="flex -space-x-3">
                   <img
                     src={hydroxLogo}
                     alt="Hydrox"
                     className="h-12 w-12 rounded-full border-2 border-primary shadow-glow object-cover"
+                  />
+                  <img
+                    src={bayviewLogo}
+                    alt="Bayview County"
+                    className="h-12 w-12 rounded-full border-2 border-[hsl(var(--brand-bayview))] object-cover"
                   />
                   <img
                     src={koyosanLogo}
