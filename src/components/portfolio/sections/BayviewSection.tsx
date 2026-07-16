@@ -1,14 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Car, Map, Users } from "lucide-react";
+import { Car, Map, Shield, Users } from "lucide-react";
 import { SiRoblox } from "react-icons/si";
 import { motion, useReducedMotion } from "framer-motion";
-import bayviewBanner from "@/assets/bayview-banner.png.asset.json";
-import bayviewLogo from "@/assets/bayview-logo.png.asset.json";
+import bayviewBanner from "@/assets/bayview-banner.png";
+import bayviewLogo from "@/assets/bayview-logo.png";
 
 const ROBLOX_URL = "https://www.roblox.com/games/99709766196624/Bayview-County";
 
 const bullets = [
+  { icon: Shield, title: "Moderator", desc: "I help moderate the server and keep things running smooth." },
   { icon: Map, title: "Open-world map", desc: "A big, detailed map inspired by Greenville with its own original locations." },
   { icon: Car, title: "Customizable vehicles", desc: "Loads of cars to drive and make your own." },
   { icon: Users, title: "Interactive jobs & RP", desc: "Jobs, systems, and roleplay experiences built into the world." },
@@ -57,14 +58,14 @@ export default function BayviewSection() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="mb-10 overflow-hidden rounded-3xl border border-[hsl(var(--brand-bayview)/0.35)] shadow-[0_18px_60px_-18px_hsl(var(--brand-bayview)/0.5)]"
         >
-          <img src={bayviewBanner.url} alt="Bayview County Banner" className="w-full object-cover" />
+          <img src={bayviewBanner} alt="Bayview County Banner" className="w-full object-cover" />
         </motion.div>
 
         <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-start">
           <div>
             <div className="flex items-center gap-4">
               <img
-                src={bayviewLogo.url}
+                src={bayviewLogo}
                 alt="Bayview County Logo"
                 className="h-16 w-16 rounded-full border-2 border-[hsl(var(--brand-bayview))] object-cover shadow-[0_18px_60px_-18px_hsl(var(--brand-bayview)/0.6)]"
               />
