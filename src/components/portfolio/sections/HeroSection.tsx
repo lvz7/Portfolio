@@ -6,6 +6,7 @@ import luziPfp from "@/assets/luzi-pfp.png";
 import ruralvilleLogo from "@/assets/ruralville-logo.png";
 import hydroxLogo from "@/assets/hydrox-logo.png";
 import koyosanLogo from "@/assets/koyosan-logo.png";
+import bayviewLogo from "@/assets/bayview-logo.png";
 
 const chips = [
   { icon: Brush, label: "Profile pics" },
