@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Brush, Code2, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import luziPfp from "@/assets/luzi-pfp.png";
-import ruralvilleLogo from "@/assets/ruralville-logo.png";
 import hydroxLogo from "@/assets/hydrox-logo.png";
 import koyosanLogo from "@/assets/koyosan-logo.png";
 import bayviewLogo from "@/assets/bayview-logo.png";
@@ -57,8 +56,8 @@ export default function HeroSection() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
               className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg"
             >
-              I make PFPs, banners, and all kinds of graphics. On the side I'm admin on Hydrox, moderator on Bayview County, and help out on Koyosan — plus I used to own Ruralville.
-            </motion.p>
+               I make PFPs, banners, and all kinds of graphics. On the side I'm admin on Hydrox, moderator on Bayview County, and help out on Koyosan.
+             </motion.p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Button
@@ -121,12 +120,6 @@ export default function HeroSection() {
                     src={koyosanLogo}
                     alt="Koyosan"
                     className="h-12 w-12 rounded-full border-2 border-[hsl(var(--brand-koyosan))] shadow-[var(--shadow-glow-koyosan)] object-cover bg-white"
-                  />
-                  <img
-                    src={ruralvilleLogo}
-                    alt="Ruralville (archived)"
-                    className="h-12 w-12 rounded-full border-2 border-[hsl(var(--brand-ruralville))] shadow-[var(--shadow-glow-ruralville)] object-cover opacity-60"
-                    title="Ruralville — archived"
                   />
                 </div>
               </div>
