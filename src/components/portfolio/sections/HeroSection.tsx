@@ -57,7 +57,7 @@ export default function HeroSection() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
               className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg"
             >
-              I make PFPs, banners, and all kinds of graphics. On the side I'm admin on Hydrox and help out on Koyosan — plus I used to own Ruralville.
+              I make PFPs, banners, and all kinds of graphics. On the side I'm admin on Hydrox, moderator on Bayview County, and help out on Koyosan — plus I used to own Ruralville.
             </motion.p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
