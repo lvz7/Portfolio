@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Brush, Code2, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import luziPfp from "@/assets/luzi-pfp.png";
-import ruralvilleLogo from "@/assets/ruralville-logo.png";
 import hydroxLogo from "@/assets/hydrox-logo.png";
 import koyosanLogo from "@/assets/koyosan-logo.png";
 import bayviewLogo from "@/assets/bayview-logo.png";
