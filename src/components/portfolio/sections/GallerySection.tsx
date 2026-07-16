@@ -17,12 +17,12 @@ import design7 from "@/assets/gallery/design-7.png";
 import design8 from "@/assets/gallery/design-8.png";
 import design9 from "@/assets/gallery/design-9.png";
 import design10 from "@/assets/gallery/design-10.png";
-import design11 from "@/assets/gallery/gallery-11.png.asset.json";
-import design12 from "@/assets/gallery/gallery-12.png.asset.json";
-import design13 from "@/assets/gallery/gallery-13.png.asset.json";
-import design14 from "@/assets/gallery/gallery-14.png.asset.json";
-import design15 from "@/assets/gallery/gallery-15.png.asset.json";
-import design16 from "@/assets/gallery/gallery-16.png.asset.json";
+import design11 from "@/assets/gallery/gallery-11.png";
+import design12 from "@/assets/gallery/gallery-12.png";
+import design13 from "@/assets/gallery/gallery-13.png";
+import design14 from "@/assets/gallery/gallery-14.png";
+import design15 from "@/assets/gallery/gallery-15.png";
+import design16 from "@/assets/gallery/gallery-16.png";
 
 const designs = [
   { src: design1, alt: "3000 Robux Design" },
@@ -35,12 +35,12 @@ const designs = [
   { src: design8, alt: "LYRP Logo Design" },
   { src: design9, alt: "LYRP Banner Design" },
   { src: design10, alt: "Crossover LGVRP Design" },
-  { src: design11.url, alt: "LYRP Logo Alt" },
-  { src: design12.url, alt: "GVRP Session Release" },
-  { src: design13.url, alt: "WGVRP Banner" },
-  { src: design14.url, alt: "Ruralville Session Concluded" },
-  { src: design15.url, alt: "Porsche 63 Design" },
-  { src: design16.url, alt: "BMW Race Banner" },
+  { src: design11, alt: "LYRP Logo Alt" },
+  { src: design12, alt: "GVRP Session Release" },
+  { src: design13, alt: "WGVRP Banner" },
+  { src: design14, alt: "Ruralville Session Concluded" },
+  { src: design15, alt: "Porsche 63 Design" },
+  { src: design16, alt: "BMW Race Banner" },
 ];
 
 
