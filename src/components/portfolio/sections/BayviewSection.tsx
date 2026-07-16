@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Car, Map, Users } from "lucide-react";
+import { Car, Map, Shield, Users } from "lucide-react";
 import { SiRoblox } from "react-icons/si";
 import { motion, useReducedMotion } from "framer-motion";
-import bayviewBanner from "@/assets/bayview-banner.png.asset.json";
-import bayviewLogo from "@/assets/bayview-logo.png.asset.json";
+import bayviewBanner from "@/assets/bayview-banner.png";
+import bayviewLogo from "@/assets/bayview-logo.png";
 
 const ROBLOX_URL = "https://www.roblox.com/games/99709766196624/Bayview-County";
 
