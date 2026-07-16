@@ -58,14 +58,14 @@ export default function BayviewSection() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="mb-10 overflow-hidden rounded-3xl border border-[hsl(var(--brand-bayview)/0.35)] shadow-[0_18px_60px_-18px_hsl(var(--brand-bayview)/0.5)]"
         >
-          <img src={bayviewBanner.url} alt="Bayview County Banner" className="w-full object-cover" />
+          <img src={bayviewBanner} alt="Bayview County Banner" className="w-full object-cover" />
         </motion.div>
 
         <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-start">
           <div>
             <div className="flex items-center gap-4">
               <img
-                src={bayviewLogo.url}
+                src={bayviewLogo}
                 alt="Bayview County Logo"
                 className="h-16 w-16 rounded-full border-2 border-[hsl(var(--brand-bayview))] object-cover shadow-[0_18px_60px_-18px_hsl(var(--brand-bayview)/0.6)]"
               />
