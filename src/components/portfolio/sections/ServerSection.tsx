@@ -1,7 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion, useReducedMotion } from "framer-motion";
-import { FaDiscord } from "react-icons/fa";
 import ruralvilleBanner from "@/assets/ruralville-banner.png";
 import ruralvilleLogo from "@/assets/ruralville-logo.png";
 
