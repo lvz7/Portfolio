@@ -44,7 +44,7 @@ export default function ServerSection() {
               </div>
 
               <p className="mt-3 text-sm text-muted-foreground">
-                I was the owner of Ruralville when it was active — we hit <span className="text-foreground">400+ members</span> before winding it down.
+                I was the owner of Ruralville when it was active. We hit <span className="text-foreground">400+ members</span> before winding it down.
               </p>
 
               <div className="mt-3 flex flex-wrap gap-1.5">
@@ -53,20 +53,6 @@ export default function ServerSection() {
                     {t}
                   </Badge>
                 ))}
-              </div>
-
-              <div className="mt-4">
-                <Button
-                  asChild
-                  size="sm"
-                  variant="outline"
-                  className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-border hover:bg-card/75"
-                >
-                  <a href="https://discord.gg/rural" target="_blank" rel="noopener noreferrer">
-                    <FaDiscord className="h-4 w-4" />
-                    Discord (archived)
-                  </a>
-                </Button>
               </div>
             </div>
           </div>
