@@ -10,7 +10,9 @@ import { ChevronDown, Menu } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import luziPfp from "@/assets/luzi-pfp.png";
 
-const navGroups = [
+type NavLink = { label: string; href: string };
+
+const navGroups: { label: string; items: NavLink[] }[] = [
   {
     label: "Work",
     items: [
@@ -38,7 +40,7 @@ const navGroups = [
     label: "Studio",
     items: [{ label: "Luzi Studios", href: "#studio" }],
   },
-] as const;
+];
 
 const allLinks = navGroups.flatMap((g) => g.items);
 
