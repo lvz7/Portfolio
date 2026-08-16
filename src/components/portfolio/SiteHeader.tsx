@@ -8,6 +8,7 @@ const links = [
   { label: "Services", href: "#services" },
   { label: "Luzi Studios", href: "#studio" },
   { label: "Ruralville", href: "#lgvrp" },
+  { label: "LYRP", href: "#lyrp" },
   { label: "Hydrox Community", href: "#hydrox" },
   { label: "Bayview County", href: "#bayview" },
   { label: "Koyosan", href: "#koyosan" },
@@ -40,7 +41,7 @@ function useActiveAnchor(ids: string[]) {
 }
 
 export default function SiteHeader() {
-  const ids = useMemo(() => ["services", "studio", "lgvrp", "hydrox", "bayview", "koyosan", "reviews"], []);
+  const ids = useMemo(() => ["services", "studio", "lgvrp", "lyrp", "hydrox", "bayview", "koyosan", "reviews"], []);
   const active = useActiveAnchor(ids);
   const [open, setOpen] = useState(false);
 

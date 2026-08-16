@@ -9,7 +9,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Luzi — vivid BMW blue on a deep navy canvas */
+    /* Luzi: vivid BMW blue on a deep navy canvas */
     --background: 218 55% 6%;
     --foreground: 210 40% 98%;
 
@@ -55,6 +55,9 @@ All colors MUST be HSL.
     --brand-ruralville: 152 58% 36%;
     --brand-ruralville-accent: 48 53% 72%;
     --brand-ruralville-muted: 152 30% 18%;
+    /* LYRP = pink-magenta */
+    --brand-lyrp: 330 62% 55%;
+    --brand-lyrp-muted: 330 30% 18%;
     /* Bayview County = green accent on blue */
     --brand-bayview: 142 70% 45%;
     --brand-bayview-muted: 142 40% 18%;
@@ -71,6 +74,7 @@ All colors MUST be HSL.
     --shadow-glow-studio: 0 18px 60px -18px hsl(var(--brand-studio) / 0.4);
     --shadow-glow-koyosan: 0 18px 60px -18px hsl(var(--brand-koyosan) / 0.5);
     --shadow-glow-ruralville: 0 18px 60px -18px hsl(var(--brand-ruralville) / 0.5);
+    --shadow-glow-lyrp: 0 18px 60px -18px hsl(var(--brand-lyrp) / 0.5);
 
     --font-sans: ui-sans-serif;
     --font-display: ui-sans-serif;

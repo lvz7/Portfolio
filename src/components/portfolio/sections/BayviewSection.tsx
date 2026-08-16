@@ -21,7 +21,7 @@ export default function BayviewSection() {
   return (
     <section id="bayview" className="border-t border-border">
       <div className="container py-16 md:py-20">
-        {/* Play callout — first thing users see */}
+        {/* Play callout: first thing users see */}
         <motion.a
           href={ROBLOX_URL}
           target="_blank"

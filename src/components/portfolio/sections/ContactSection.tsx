@@ -47,7 +47,7 @@ export default function ContactSection() {
 
       toast({
         title: "Message sent!",
-        description: "Thanks for reaching out — I'll get back to you soon.",
+        description: "Thanks for reaching out! I'll get back to you soon.",
       });
 
       // Clear form
@@ -72,7 +72,7 @@ export default function ContactSection() {
           <div>
             <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Contact</h2>
             <p className="mt-2 max-w-xl text-muted-foreground">
-              Just tell me what you need — style, colors, deadline. I'll get back to you with a plan.
+              Just tell me what you need: style, colors, deadline. I'll get back to you with a plan.
             </p>
 
             <div className="mt-6 rounded-3xl border border-border/70 bg-card/70 p-6 shadow-elevated backdrop-blur-md">
@@ -134,7 +134,7 @@ export default function ContactSection() {
                 </label>
                 <Textarea
                   id="details"
-                  placeholder="Example: A neon banner for my server — purple + teal, with my logo centered."
+                  placeholder="Example: A neon banner for my server, purple + teal, with my logo centered."
                   className="min-h-28 bg-background/40"
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
