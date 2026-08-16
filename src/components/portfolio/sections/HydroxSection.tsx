@@ -12,7 +12,7 @@ const ROBLOX_URL = "https://www.roblox.com/games/12315904188/Hydrox-Sandbox-UK-V
 
 const bullets = [
   { icon: Shield, title: "Admin", desc: "I moderate and help keep things running smooth in the sandbox." },
-  { icon: Car, title: "Car nerd stuff", desc: "It's a driving sandbox — customise, cruise, mess around." },
+  { icon: Car, title: "Car nerd stuff", desc: "It's a driving sandbox, customise, cruise, mess around." },
   { icon: Users, title: "Growing community", desc: "Active player base with regular updates." },
 ] as const;
 
@@ -23,7 +23,7 @@ export default function HydroxSection() {
   return (
     <section id="hydrox" className="border-t border-border">
       <div className="container py-16 md:py-20">
-        {/* Play callout — first thing users see */}
+        {/* Play callout: first thing users see */}
         <motion.a
           href={ROBLOX_URL}
           target="_blank"
@@ -90,7 +90,7 @@ export default function HydroxSection() {
               </div>
             </div>
             <p className="mt-3 text-muted-foreground">
-              A driving/car sandbox on Roblox — I'm admin on <span className="text-foreground font-medium">Hydrox Sandbox: UK V3</span>. Cars, cruises, and a solid community.
+              A driving/car sandbox on Roblox. I'm admin on <span className="text-foreground font-medium">Hydrox Sandbox: UK V3</span>. Cars, cruises, and a solid community.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">

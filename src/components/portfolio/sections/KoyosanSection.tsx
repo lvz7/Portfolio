@@ -98,7 +98,7 @@ export default function KoyosanSection() {
               <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Koyosan, Japan</h2>
             </div>
             <p className="mt-3 text-muted-foreground">
-              A driving and RP game set in Japan — I'm a Map Builder & Co-Owner over there.
+              A driving and RP game set in Japan. I'm a Map Builder & Co-Owner over there.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">

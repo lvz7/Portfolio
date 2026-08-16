@@ -7,7 +7,7 @@ const services = [
   {
     icon: Brush,
     title: "Profile Pictures",
-    desc: "Icons, mascots, stylized portraits — stuff that looks good even tiny.",
+    desc: "Icons, mascots, stylized portraits, stuff that looks good even tiny.",
     tags: ["High contrast", "Readable"],
   },
   {
@@ -25,7 +25,7 @@ const services = [
   {
     icon: Palette,
     title: "Server Visuals",
-    desc: "Icons, panels, splash screens — all the visual stuff your server needs.",
+    desc: "Icons, panels, splash screens, all the visual stuff your server needs.",
     tags: ["Systems", "Polish"],
   },
 ] as const;
@@ -40,7 +40,7 @@ export default function ServicesSection() {
           <div>
             <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Services</h2>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              Everything I make is clean, colorful, and easy to read — no matter the size.
+              Everything I make is clean, colorful, and easy to read, no matter the size.
             </p>
           </div>
 
