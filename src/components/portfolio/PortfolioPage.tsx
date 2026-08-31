@@ -3,13 +3,13 @@ import HeroSection from "@/components/portfolio/sections/HeroSection";
 import ServicesSection from "@/components/portfolio/sections/ServicesSection";
 import GallerySection from "@/components/portfolio/sections/GallerySection";
 import LuziStudiosSection from "@/components/portfolio/sections/LuziStudiosSection";
-import ServerSection from "@/components/portfolio/sections/ServerSection";
-import LyrpSection from "@/components/portfolio/sections/LyrpSection";
+import ArchivedProjects from "@/components/portfolio/sections/ArchivedProjects";
 import HydroxSection from "@/components/portfolio/sections/HydroxSection";
 import BayviewSection from "@/components/portfolio/sections/BayviewSection";
 import KoyosanSection from "@/components/portfolio/sections/KoyosanSection";
 import ReviewsSection from "@/components/portfolio/sections/ReviewsSection";
 import ContactSection from "@/components/portfolio/sections/ContactSection";
+import { Lock } from "lucide-react";
 export default function PortfolioPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -26,17 +26,16 @@ export default function PortfolioPage() {
         <ServicesSection />
         <GallerySection />
         <LuziStudiosSection />
-        <ServerSection />
-        <LyrpSection />
         <HydroxSection />
         <BayviewSection />
         <KoyosanSection />
+        <ArchivedProjects />
         <ReviewsSection />
         <ContactSection />
       </main>
 
       <footer className="border-t border-border">
-        <div className="container py-8 flex items-center justify-between">
+        <div className="container py-6 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Luzi. Designs • Development • Communities
           </p>
@@ -44,8 +43,10 @@ export default function PortfolioPage() {
             href="https://luzi-creative-hub.lovable.app/admin"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
+            className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"
+            aria-label="Admin panel"
           >
+            <Lock className="h-3 w-3" />
             Admin
           </a>
         </div>
@@ -53,3 +54,4 @@ export default function PortfolioPage() {
     </div>
   );
 }
+

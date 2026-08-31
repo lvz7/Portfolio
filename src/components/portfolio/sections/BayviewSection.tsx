@@ -21,36 +21,47 @@ export default function BayviewSection() {
   return (
     <section id="bayview" className="border-t border-border">
       <div className="container py-16 md:py-20">
-        {/* Play callout: first thing users see */}
-        <motion.a
-          href={ROBLOX_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* Header + play callout */}
+        <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 12 }}
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-10% 0px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="group mb-8 flex items-center justify-between gap-4 rounded-3xl border border-[hsl(var(--brand-bayview)/0.4)] bg-card/70 p-5 shadow-[var(--shadow-glow)] backdrop-blur-md transition-transform hover:scale-[1.01] md:p-6"
+          className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
         >
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[hsl(var(--brand-bayview))] shadow-[0_18px_60px_-18px_hsl(var(--brand-bayview)/0.6)]">
-              <SiRoblox className="h-7 w-7 text-white" />
-            </div>
+            <img
+              src={bayviewLogo}
+              alt="Bayview County Logo"
+              className="h-16 w-16 rounded-full border-2 border-[hsl(var(--brand-bayview))] object-cover shadow-[0_18px_60px_-18px_hsl(var(--brand-bayview)/0.6)]"
+            />
             <div>
-              <div className="font-display text-lg font-semibold md:text-xl">Play Bayview County on Roblox</div>
-              <div className="text-sm text-muted-foreground">Launch the official Bayview County experience.</div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Bayview County, USA</h2>
+                <Badge
+                  className="bg-[hsl(var(--brand-bayview-muted))] text-[hsl(var(--brand-bayview))] border border-[hsl(var(--brand-bayview)/0.3)]"
+                  variant="secondary"
+                >
+                  Moderator
+                </Badge>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">Realistic Roblox driving & roleplay.</p>
             </div>
           </div>
-          <Button
-            variant="default"
-            className="hidden bg-[hsl(var(--brand-bayview))] text-white hover:brightness-110 sm:inline-flex before:bg-[radial-gradient(ellipse_at_center,hsl(var(--brand-bayview)/0.6),transparent_70%)]"
-            asChild
-          >
-            <span>Play now</span>
-          </Button>
-        </motion.a>
 
-        {/* Banner */}
+          <Button
+            asChild
+            variant="default"
+            className="w-full bg-[hsl(var(--brand-bayview))] text-white hover:brightness-110 md:w-auto before:bg-[radial-gradient(ellipse_at_center,hsl(var(--brand-bayview)/0.6),transparent_70%)]"
+          >
+            <a href={ROBLOX_URL} target="_blank" rel="noopener noreferrer">
+              <SiRoblox className="h-4 w-4" />
+              Play on Roblox
+            </a>
+          </Button>
+        </motion.div>
+
+        {/* Banner: full width, map-focus feel */}
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -61,18 +72,10 @@ export default function BayviewSection() {
           <img src={bayviewBanner} alt="Bayview County Banner" className="w-full object-cover" />
         </motion.div>
 
-        <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-start">
+        <div className="grid gap-10 md:grid-cols-[1fr_1fr] md:items-start">
           <div>
-            <div className="flex items-center gap-4">
-              <img
-                src={bayviewLogo}
-                alt="Bayview County Logo"
-                className="h-16 w-16 rounded-full border-2 border-[hsl(var(--brand-bayview))] object-cover shadow-[0_18px_60px_-18px_hsl(var(--brand-bayview)/0.6)]"
-              />
-              <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Bayview County, USA</h2>
-            </div>
-            <p className="mt-3 text-muted-foreground">
-              Bayview County is a realistic Roblox driving and roleplay game inspired by Greenville. It features a large open-world map, interactive jobs, customizable vehicles, and immersive roleplay experiences. While inspired by Greenville, Bayview County has grown into its own unique experience with original locations, gameplay systems, and identity. I'm a moderator on the server.
+            <p className="text-muted-foreground">
+              Bayview County is a realistic Roblox driving and roleplay game inspired by Greenville. It features a large open-world map, interactive jobs, customizable vehicles, and immersive roleplay experiences. While inspired by Greenville, Bayview County has grown into its own unique experience with original locations, gameplay systems, and identity.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -85,19 +88,6 @@ export default function BayviewSection() {
                   {t}
                 </Badge>
               ))}
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button
-                asChild
-                variant="default"
-                className="bg-[hsl(var(--brand-bayview))] text-white hover:brightness-110 before:bg-[radial-gradient(ellipse_at_center,hsl(var(--brand-bayview)/0.6),transparent_70%)]"
-              >
-                <a href={ROBLOX_URL} target="_blank" rel="noopener noreferrer">
-                  <SiRoblox className="h-4 w-4" />
-                  Play on Roblox
-                </a>
-              </Button>
             </div>
           </div>
 
