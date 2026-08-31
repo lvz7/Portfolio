@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Car, Gamepad2, Map, Play, Users } from "lucide-react";
+import { Car, Gamepad2, Map, Play, Users, X } from "lucide-react";
 import { FaDiscord, FaTiktok } from "react-icons/fa";
 import { SiRoblox } from "react-icons/si";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -21,13 +21,19 @@ export default function KoyosanSection() {
 
   const handlePlay = useCallback(() => {
     setPlaying(true);
-    // Small delay so the video element mounts first
     setTimeout(() => {
       videoRef.current?.play();
     }, 50);
   }, []);
 
   const handleEnded = useCallback(() => {
+    setPlaying(false);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
     setPlaying(false);
   }, []);
 
@@ -58,10 +64,11 @@ export default function KoyosanSection() {
                   alt="Koyosan, Japan Banner"
                   className="w-full object-contain"
                 />
-                <div className="absolute bottom-4 right-4 flex items-center gap-2 cursor-pointer group" onClick={handlePlay}>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                <div className="absolute bottom-4 right-4 flex items-center gap-3 cursor-pointer group" onClick={handlePlay}>
                   <span className="text-sm font-medium text-white drop-shadow-md">Trailer</span>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--brand-koyosan))] shadow-[var(--shadow-glow-koyosan)] group-hover:scale-110 transition-transform">
-                    <Play className="h-4 w-4 text-white ml-0.5" fill="white" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[hsl(var(--brand-koyosan))] shadow-[var(--shadow-glow-koyosan)] group-hover:scale-110 transition-transform">
+                    <Play className="h-5 w-5 text-white ml-0.5" fill="white" />
                   </div>
                 </div>
               </motion.div>
@@ -72,7 +79,15 @@ export default function KoyosanSection() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
+                className="relative bg-black"
               >
+                <button
+                  onClick={handleClose}
+                  className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-black/80"
+                  aria-label="Close trailer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
                 <video
                   ref={videoRef}
                   src="/videos/koyosan-trailer.mov"
@@ -95,7 +110,15 @@ export default function KoyosanSection() {
                 alt="Koyosan Logo"
                 className="h-16 w-16 rounded-full border-2 border-[hsl(var(--brand-koyosan))] shadow-[var(--shadow-glow-koyosan)] bg-white object-cover"
               />
-              <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Koyosan, Japan</h2>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Koyosan, Japan</h2>
+                  <Badge className="bg-[hsl(var(--brand-koyosan-muted))] text-[hsl(var(--brand-koyosan))] border border-[hsl(var(--brand-koyosan)/0.3)]" variant="secondary">
+                    Co-Owner
+                  </Badge>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">Map builder & co-owner.</p>
+              </div>
             </div>
             <p className="mt-3 text-muted-foreground">
               A driving and RP game set in Japan. I'm a Map Builder & Co-Owner over there.
