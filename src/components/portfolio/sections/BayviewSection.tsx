@@ -99,7 +99,7 @@ export default function BayviewSection() {
                 whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-20% 0px" }}
                 transition={{ duration: 0.45, ease: "easeOut", delay: idx * 0.05 }}
-                className="rounded-3xl border border-[hsl(var(--brand-bayosan)/0.3)] bg-card/70 p-6 shadow-elevated backdrop-blur-md"
+                className="rounded-3xl border border-[hsl(var(--brand-bayview)/0.3)] bg-card/70 p-6 shadow-elevated backdrop-blur-md"
               >
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[hsl(var(--brand-bayview))]">
