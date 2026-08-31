@@ -12,8 +12,7 @@ const archives = [
     desc: "Owned it while it was active. We hit 400+ members before winding it down.",
     logo: ruralvilleLogo,
     logoAlt: "Ruralville Logo",
-    accent: "[hsl(var(--brand-ruralville))]",
-    shadow: "var(--shadow-glow-ruralville)",
+    logoClass: "border-[hsl(var(--brand-ruralville))] shadow-[var(--shadow-glow-ruralville)]",
   },
   {
     id: "lyrp",
@@ -23,8 +22,7 @@ const archives = [
     desc: "My Young Street Ontario roleplay server. Peaked at 600 members before I closed it.",
     logo: lyrpLogo,
     logoAlt: "Luzi's YSO Roleplay Logo",
-    accent: "[hsl(var(--brand-lyrp))]",
-    shadow: "var(--shadow-glow-lyrp)",
+    logoClass: "border-[hsl(var(--brand-lyrp))] shadow-[var(--shadow-glow-lyrp)]",
   },
 ] as const;
 
@@ -59,7 +57,7 @@ export default function ArchivedProjects() {
                 <img
                   src={a.logo}
                   alt={a.logoAlt}
-                  className={`h-11 w-11 rounded-full border-2 border-${a.accent} shadow-[${a.shadow}] object-cover`}
+                  className={`h-11 w-11 rounded-full border-2 object-cover ${a.logoClass}`}
                 />
                 <div>
                   <h3 className="font-display text-base font-semibold tracking-tight">{a.name}</h3>
@@ -86,3 +84,4 @@ export default function ArchivedProjects() {
     </section>
   );
 }
+
