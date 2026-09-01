@@ -85,6 +85,8 @@ export default function GallerySection() {
             {categories.map((cat) => (
               <button
                 key={cat}
+                type="button"
+                aria-pressed={active === cat}
                 onClick={() => setActive(cat)}
                 className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${
                   active === cat

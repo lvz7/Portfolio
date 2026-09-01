@@ -2,3 +2,5 @@ project_id = "chwkksbbhckrhpudclvy"
 
 [functions.reviews-admin]
 verify_jwt = false
+[functions.roblox-players]
+verify_jwt = false

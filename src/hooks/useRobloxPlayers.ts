@@ -11,10 +11,12 @@ interface RobloxState {
   loading: boolean;
 }
 
+const FN_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/roblox-players`;
+
 /**
- * Fetches live player count for a Roblox game.
- * Pass the Universe ID (not the place ID). Find it via:
- *   https://apis.roblox.com/universes/v1/places/<PLACE_ID>/universe
+ * Fetches the live player count for a Roblox game through our backend proxy
+ * (the Roblox API itself blocks browser requests with CORS).
+ * Pass the Universe ID, not the place ID.
  */
 export function useRobloxPlayers(universeId: string): RobloxState {
   const [state, setState] = useState<RobloxState>({ counts: null, error: false, loading: true });
@@ -26,36 +28,25 @@ export function useRobloxPlayers(universeId: string): RobloxState {
     }
     let cancelled = false;
 
-    const fetchCount = () => {
-      fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`)
-        .then((r) => {
-          if (!r.ok) throw new Error(`Roblox API ${r.status}`);
-          return r.json();
-        })
-        .then((json) => {
-          if (cancelled) return;
-          const game = json?.data?.[0];
-          if (game) {
-            setState({
-              counts: {
-                playing: game.playing ?? 0,
-                visits: game.visits ?? null,
-              },
-              error: false,
-              loading: false,
-            });
-          } else {
-            setState({ counts: null, error: true, loading: false });
-          }
-        })
-        .catch(() => {
-          if (cancelled) return;
-          setState((s) => ({ ...s, error: true, loading: false }));
+    const fetchCount = async () => {
+      try {
+        const res = await fetch(`${FN_BASE}?universeId=${encodeURIComponent(universeId)}`);
+        if (!res.ok) throw new Error(String(res.status));
+        const json = await res.json();
+        if (cancelled) return;
+        setState({
+          counts: { playing: json.playing ?? 0, visits: json.visits ?? null },
+          error: false,
+          loading: false,
         });
+      } catch {
+        if (cancelled) return;
+        setState((s) => ({ ...s, error: true, loading: false }));
+      }
     };
 
-    fetchCount();
-    const t = setInterval(fetchCount, 60_000);
+    void fetchCount();
+    const t = setInterval(() => void fetchCount(), 60_000);
     return () => {
       cancelled = true;
       clearInterval(t);
@@ -64,4 +55,3 @@ export function useRobloxPlayers(universeId: string): RobloxState {
 
   return state;
 }
-
