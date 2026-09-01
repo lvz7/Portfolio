@@ -423,6 +423,8 @@ export default function ReviewsSection() {
                         <Stars value={r.rating} />
                         {isOwner && (
                           <button
+                            type="button"
+                            aria-label={`Delete review by ${r.name}`}
                             onClick={async () => {
                               if (!confirm("Delete this review?")) return;
                               try {
@@ -434,7 +436,13 @@ export default function ReviewsSection() {
                                 const json = await res.json();
                                 if (!res.ok) throw new Error(json.error || "Failed");
                                 void refetch();
-                              } catch {}
+                              } catch {
+                                toast({
+                                  title: "Could not delete that review",
+                                  description: "Try again in a moment.",
+                                  variant: "destructive",
+                                });
+                              }
                             }}
                             className="text-xs text-destructive/60 hover:text-destructive transition-colors"
                             title="Delete review"
