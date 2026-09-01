@@ -301,14 +301,17 @@ export default function ReviewsSection() {
               </div>
 
               <div className="grid gap-2">
-                <label className="text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground" id="rating-label">
                   Rating
-                </label>
-                <div className="flex items-center gap-1">
+                </span>
+                <div className="flex items-center gap-1" role="radiogroup" aria-labelledby="rating-label">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       type="button"
+                      role="radio"
+                      aria-checked={form.watch("rating") === star}
+                      aria-label={`${star} star${star > 1 ? "s" : ""}`}
                       onClick={() => form.setValue("rating", star)}
                       className={`text-2xl transition-colors ${
                         star <= form.watch("rating")
@@ -320,6 +323,7 @@ export default function ReviewsSection() {
                     </button>
                   ))}
                 </div>
+
                 {form.formState.errors.rating?.message ? (
                   <p className="text-xs text-destructive">{form.formState.errors.rating.message}</p>
                 ) : null}
