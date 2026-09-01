@@ -364,6 +364,7 @@ export default function ReviewsSection() {
                     />
                     <button
                       type="button"
+                      aria-label="Remove selected image"
                       onClick={() => {
                         setImageFile(null);
                         setImagePreview(null);
