@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -54,10 +54,10 @@ type PublicReview = {
   created_at: string;
 };
 
-function Stars({ value }: { value: number }) {
+const Stars = forwardRef<HTMLDivElement, { value: number }>(function Stars({ value }, ref) {
   const stars = Array.from({ length: 5 }, (_, i) => i + 1);
   return (
-    <div className="flex items-center gap-1" aria-label={`${value} out of 5 stars`}>
+    <div ref={ref} className="flex items-center gap-1" aria-label={`${value} out of 5 stars`}>
       {stars.map((s) => (
         <span
           key={s}
@@ -72,7 +72,7 @@ function Stars({ value }: { value: number }) {
       ))}
     </div>
   );
-}
+});
 
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reviews-admin`;
 

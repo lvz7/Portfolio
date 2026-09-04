@@ -103,7 +103,7 @@ export default function SiteHeader() {
           </div>
         </a>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
           {/* Work */}
           <NavLink href="#services" active={active === "services"}>
             Services
@@ -168,7 +168,7 @@ export default function SiteHeader() {
         <Button
           variant="outline"
           size="icon"
-          className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-border hover:bg-card/75 md:hidden"
+          className="bg-card/60 text-foreground shadow-elevated backdrop-blur-md border-border hover:bg-card/75 lg:hidden"
           aria-label="Open menu"
           onClick={() => setOpen((v) => !v)}
         >
@@ -177,7 +177,7 @@ export default function SiteHeader() {
       </div>
 
       {open && (
-        <div className="border-t border-border/70 bg-background/70 md:hidden">
+        <div className="border-t border-border/70 bg-background/70 lg:hidden">
           <div className="container py-3">
             <div className="grid gap-4">
               {navGroups.map((group) => (
