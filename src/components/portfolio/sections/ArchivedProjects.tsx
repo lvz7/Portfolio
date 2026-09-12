@@ -2,8 +2,19 @@ import { Badge } from "@/components/ui/badge";
 import { motion, useReducedMotion } from "framer-motion";
 import ruralvilleLogo from "@/assets/ruralville-logo.png";
 import lyrpLogo from "@/assets/lyrp-logo.png";
+import koyosanLogo from "@/assets/koyosan-logo.png";
 
 const archives = [
+  {
+    id: "koyosan",
+    name: "Koyosan, Japan",
+    stat: "Driving & RP game",
+    role: "Co-Owner",
+    desc: "Built maps and co-owned this Japanese driving and roleplay game before moving on.",
+    logo: koyosanLogo,
+    logoAlt: "Koyosan Logo",
+    logoClass: "border-[hsl(var(--brand-koyosan))] shadow-[var(--shadow-glow-koyosan)] bg-white",
+  },
   {
     id: "lgvrp",
     name: "Ruralville",
