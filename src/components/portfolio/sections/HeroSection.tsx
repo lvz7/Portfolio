@@ -4,7 +4,7 @@ import { ArrowRight, Brush, Code2, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import luziPfp from "@/assets/luzi-pfp.png";
 import hydroxLogo from "@/assets/hydrox-logo.png";
-import koyosanLogo from "@/assets/koyosan-logo.png";
+
 import bayviewLogo from "@/assets/bayview-logo.png";
 
 const chips = [
@@ -56,7 +56,7 @@ export default function HeroSection() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
               className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg"
             >
-               I make PFPs, banners, and all kinds of graphics. On the side I'm admin on Hydrox, moderator on Bayview County, and help out on Koyosan.
+               I make PFPs, banners, and all kinds of graphics. On the side I'm admin on Hydrox and moderator on Bayview County.
              </motion.p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -103,7 +103,7 @@ export default function HeroSection() {
                 <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-muted-foreground">Currently in</div>
-                  <div className="mt-1 font-display text-lg font-semibold">Hydrox, Bayview & Koyosan</div>
+                  <div className="mt-1 font-display text-lg font-semibold">Hydrox & Bayview</div>
                 </div>
                 <div className="flex -space-x-3">
                   <img
@@ -115,11 +115,6 @@ export default function HeroSection() {
                     src={bayviewLogo}
                     alt="Bayview County"
                     className="h-12 w-12 rounded-full border-2 border-[hsl(var(--brand-bayview))] object-cover"
-                  />
-                  <img
-                    src={koyosanLogo}
-                    alt="Koyosan"
-                    className="h-12 w-12 rounded-full border-2 border-[hsl(var(--brand-koyosan))] shadow-[var(--shadow-glow-koyosan)] object-cover bg-white"
                   />
                 </div>
               </div>
