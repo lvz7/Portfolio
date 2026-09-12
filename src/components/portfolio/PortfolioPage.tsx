@@ -6,7 +6,7 @@ import LuziStudiosSection from "@/components/portfolio/sections/LuziStudiosSecti
 import ArchivedProjects from "@/components/portfolio/sections/ArchivedProjects";
 import HydroxSection from "@/components/portfolio/sections/HydroxSection";
 import BayviewSection from "@/components/portfolio/sections/BayviewSection";
-import KoyosanSection from "@/components/portfolio/sections/KoyosanSection";
+
 import ReviewsSection from "@/components/portfolio/sections/ReviewsSection";
 import ContactSection from "@/components/portfolio/sections/ContactSection";
 import { Lock } from "lucide-react";
@@ -28,7 +28,7 @@ export default function PortfolioPage() {
         <LuziStudiosSection />
         <HydroxSection />
         <BayviewSection />
-        <KoyosanSection />
+        
         <ArchivedProjects />
         <ReviewsSection />
         <ContactSection />

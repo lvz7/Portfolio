@@ -26,12 +26,12 @@ const navGroups: { label: string; items: NavLink[] }[] = [
     items: [
       { label: "Hydrox Community", href: "#hydrox" },
       { label: "Bayview County", href: "#bayview" },
-      { label: "Koyosan", href: "#koyosan" },
     ],
   },
   {
     label: "Archive",
     items: [
+      { label: "Koyosan", href: "#koyosan" },
       { label: "Ruralville", href: "#lgvrp" },
       { label: "LYRP", href: "#lyrp" },
     ],
@@ -124,9 +124,6 @@ export default function SiteHeader() {
           <NavLink href="#bayview" active={active === "bayview"}>
             Bayview
           </NavLink>
-          <NavLink href="#koyosan" active={active === "koyosan"}>
-            Koyosan
-          </NavLink>
 
           <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
 
@@ -136,7 +133,7 @@ export default function SiteHeader() {
               <button
                 className={cn(
                   "group inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm transition-colors hover:bg-secondary",
-                  active === "lgvrp" || active === "lyrp" ? "bg-secondary text-foreground" : "text-muted-foreground",
+                  active === "lgvrp" || active === "lyrp" || active === "koyosan" ? "bg-secondary text-foreground" : "text-muted-foreground",
                 )}
               >
                 Archive
@@ -144,6 +141,11 @@ export default function SiteHeader() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-xl border-border/70 bg-card/95 backdrop-blur-md">
+              <DropdownMenuItem asChild>
+                <a href="#koyosan" className="cursor-pointer text-sm">
+                  Koyosan
+                </a>
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a href="#lgvrp" className="cursor-pointer text-sm">
                   Ruralville
