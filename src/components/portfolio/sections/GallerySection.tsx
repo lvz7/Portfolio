@@ -24,6 +24,7 @@ import design13 from "@/assets/gallery/gallery-13.png";
 import design14 from "@/assets/gallery/gallery-14.png";
 import design15 from "@/assets/gallery/gallery-15.png";
 import design16 from "@/assets/gallery/gallery-16.png";
+import bayviewBannedVehicleAsset from "@/assets/gallery/bayview-banned-vehicle-list.png.asset.json";
 
 type Category = "All" | "PFPs" | "Logos" | "Banners" | "Thumbnails" | "Animations";
 
@@ -46,6 +47,7 @@ const designs = [
   { src: design14, alt: "Ruralville Session Concluded", category: "Thumbnails" },
   { src: design15, alt: "Porsche 63 Design", category: "PFPs" },
   { src: design16, alt: "BMW Race Banner", category: "Banners" },
+  { src: bayviewBannedVehicleAsset.url, alt: "Bayview County Banned Vehicle List", category: "Thumbnails" },
 ] as const;
 
 export default function GallerySection() {
