@@ -5,7 +5,9 @@ import { SiRoblox } from "react-icons/si";
 import { motion, useReducedMotion } from "framer-motion";
 import bayviewBanner from "@/assets/bayview-banner.png";
 import bayviewLogo from "@/assets/bayview-logo.png";
+import { useRobloxPlayers } from "@/hooks/useRobloxPlayers";
 
+const BAYVIEW_UNIVERSE_ID = "8447549223";
 const ROBLOX_URL = "https://www.roblox.com/games/99709766196624/Bayview-County";
 
 const bullets = [
@@ -17,6 +19,7 @@ const bullets = [
 
 export default function BayviewSection() {
   const reduceMotion = useReducedMotion();
+  const { counts, error } = useRobloxPlayers(BAYVIEW_UNIVERSE_ID);
 
   return (
     <section id="bayview" className="border-t border-border">
@@ -46,6 +49,12 @@ export default function BayviewSection() {
                 </Badge>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">Realistic Roblox driving & roleplay.</p>
+              {!error && counts && (
+                <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  {counts.playing} playing now
+                </span>
+              )}
             </div>
           </div>
 
