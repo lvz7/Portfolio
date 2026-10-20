@@ -4,7 +4,8 @@ import { useReducedMotion } from "framer-motion";
 // A BMW M2 G87 on the right edge of the screen.
 // Scroll: the car moves down the right side and turns.
 // D: opens and closes the doors, with a door sound.
-// E: turns the engine on and off. W: accelerate (revs and tire squeal). S: brake.
+// Space: turns the engine on and off. W: accelerate (revs and tire squeal). S: brake.
+// Q: shift down. E: shift up (six gears).
 // Wheels spin and the rear tires smoke, like a burnout.
 
 const MODEL_SRC = "/models/bmw-m2-g87.glb";
@@ -118,6 +119,26 @@ function playDoorThunk(sound: CarSound) {
   src.stop(now + 0.3);
 }
 
+// A short click for a gear change.
+function playShiftBlip(sound: CarSound) {
+  const { ctx, master, noiseBuffer } = sound;
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuffer;
+  const lp = ctx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 900;
+  const env = ctx.createGain();
+  const now = ctx.currentTime;
+  env.gain.setValueAtTime(0.0001, now);
+  env.gain.exponentialRampToValueAtTime(0.35, now + 0.005);
+  env.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+  src.connect(lp);
+  lp.connect(env);
+  env.connect(master);
+  src.start(now, Math.random());
+  src.stop(now + 0.15);
+}
+
 // A short squeal for braking, played once when S is pressed.
 function playBrakeSqueal(sound: CarSound) {
   const { ctx, master, noiseBuffer } = sound;
@@ -146,7 +167,7 @@ export default function M2Float() {
   const reduceMotion = useReducedMotion();
 
   // The key handler and animation loop read this state.
-  const controls = useRef({ doorsOpen: false, engineOn: false, throttle: false, brake: false });
+  const controls = useRef({ doorsOpen: false, engineOn: false, throttle: false, brake: false, gear: 1 });
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -245,11 +266,12 @@ export default function M2Float() {
 
               // Engine sound: E turns it on. W revs it and adds tire squeal. S lowers the pitch.
               if (sound) {
-                const { engineOn, throttle, brake } = controls.current;
+                const { engineOn, throttle, brake, gear } = controls.current;
                 const t = sound.ctx.currentTime;
                 // A slow swell in idle pitch, so the idle sounds alive instead of flat.
                 const idle = 48 + 6 * Math.abs(Math.sin(now * 0.0016));
-                const pitch = throttle ? 110 : brake ? 40 : idle;
+                // Higher gears sit at a higher pitch under throttle.
+                const pitch = throttle ? 70 + gear * 12 : brake ? 40 : idle;
                 sound.engineOsc.frequency.setTargetAtTime(pitch, t, throttle ? 0.12 : 0.25);
                 const level = engineOn ? (throttle ? 0.2 : brake ? 0.07 : 0.12) : 0;
                 sound.engineGain.gain.setTargetAtTime(level, t, 0.12);
@@ -273,10 +295,21 @@ export default function M2Float() {
                 if (sound.ctx.state === "suspended") sound.ctx.resume();
                 playDoorThunk(sound);
               }
-              if (key === "e") {
+              if (key === " ") {
+                e.preventDefault();
                 controls.current.engineOn = !controls.current.engineOn;
                 if (!sound) sound = createCarSound();
                 if (sound.ctx.state === "suspended") sound.ctx.resume();
+              }
+              if (key === "q" || key === "e") {
+                // Q shifts down, E shifts up, within gears 1 to 6.
+                const next = controls.current.gear + (key === "e" ? 1 : -1);
+                if (next >= 1 && next <= 6) {
+                  controls.current.gear = next;
+                  if (!sound) sound = createCarSound();
+                  if (sound.ctx.state === "suspended") sound.ctx.resume();
+                  playShiftBlip(sound);
+                }
               }
               if (key === "w" || key === "s") {
                 if (!sound) sound = createCarSound();
