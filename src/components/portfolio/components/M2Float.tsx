@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 
-// Drop the model file at public/models/bmw-m2-g87.glb to show the car.
-// Until that file exists the element stays hidden.
+// The car lives on the right edge of the screen. It moves up and down with the page and turns as you scroll.
 const MODEL_SRC = "/models/bmw-m2-g87.glb";
 const MODEL_VIEWER_SCRIPT = "https://cdn.jsdelivr.net/npm/@google/model-viewer@3.4.0/dist/model-viewer.min.js";
-const CAR_WIDTH = 320;
-const CAR_HEIGHT = 200;
+const CAR_WIDTH = 480;
+const CAR_HEIGHT = 300;
+const RIGHT_MARGIN = 24;
+const TOP_OFFSET = 96; // Keeps the car below the sticky header.
+const BOTTOM_OFFSET = 24;
 
 declare global {
   namespace JSX {
@@ -32,7 +34,7 @@ export default function M2Float() {
     }
   }, []);
 
-  // Show the car only once the model has actually loaded.
+  // Fade the car in only once the model has actually loaded.
   useEffect(() => {
     const car = carRef.current;
     if (!car) return;
@@ -46,7 +48,7 @@ export default function M2Float() {
     };
   }, []);
 
-  // Move the car across the screen and turn it as the page scrolls.
+  // Move the car down the right side as the page scrolls, and turn it one full rotation over the page.
   useEffect(() => {
     let frame = 0;
 
@@ -59,17 +61,12 @@ export default function M2Float() {
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const p = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
 
-      // Drift left and right as you scroll, and move down the screen with the page.
-      const freeWidth = Math.max(window.innerWidth - CAR_WIDTH, 0);
-      // Start below the sticky header (about 64px tall) so the car is never hidden under it.
-      const top = 88;
-      const freeHeight = Math.max(window.innerHeight - CAR_HEIGHT - top, 0);
-      const x = freeWidth * (0.5 + 0.45 * Math.sin(p * Math.PI * 4));
-      const y = top + freeHeight * p;
+      const x = Math.max(window.innerWidth - CAR_WIDTH - RIGHT_MARGIN, 0);
+      const freeHeight = Math.max(window.innerHeight - CAR_HEIGHT - TOP_OFFSET - BOTTOM_OFFSET, 0);
+      const y = TOP_OFFSET + freeHeight * p;
       wrap.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 
-      // Turn the car one full rotation over the length of the page.
-      car.setAttribute("camera-orbit", `${Math.round(p * 360)}deg 75deg 105%`);
+      car.setAttribute("camera-orbit", `${Math.round(p * 360)}deg 75deg 110%`);
     };
 
     const onScroll = () => {
@@ -96,7 +93,7 @@ export default function M2Float() {
     <div
       ref={wrapRef}
       aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-30 hidden md:block"
+      className="pointer-events-none fixed left-0 top-0 z-30 hidden lg:block"
       style={{
         width: CAR_WIDTH,
         height: CAR_HEIGHT,
@@ -108,20 +105,17 @@ export default function M2Float() {
       <model-viewer
         ref={carRef}
         src={MODEL_SRC}
-        alt="BMW M2 G87"
-        camera-orbit="0deg 75deg 105%"
+        alt="BMW M2 G87 in Voodoo Blue"
+        camera-orbit="0deg 75deg 110%"
+        environment-image="neutral"
+        tone-mapping="neutral"
+        exposure="1.1"
+        shadow-intensity="0.6"
         disable-zoom
         disable-pan
         interaction-prompt="none"
-        shadow-intensity="1"
-        exposure="1"
         style={{ width: "100%", height: "100%", background: "transparent", pointerEvents: "none" }}
       />
-      {loaded && (
-        <p className="absolute bottom-0 left-0 text-[10px] text-muted-foreground/60">
-          Model: Black Snow (BlackSnow02), CC BY 4.0, via Sketchfab
-        </p>
-      )}
     </div>
   );
 }
