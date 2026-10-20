@@ -48,7 +48,6 @@ export default function M2Float() {
 
   // Move the car across the screen and turn it as the page scrolls.
   useEffect(() => {
-    if (reduceMotion) return;
     let frame = 0;
 
     const update = () => {
@@ -62,9 +61,11 @@ export default function M2Float() {
 
       // Drift left and right as you scroll, and move down the screen with the page.
       const freeWidth = Math.max(window.innerWidth - CAR_WIDTH, 0);
-      const freeHeight = Math.max(window.innerHeight - CAR_HEIGHT, 0);
+      // Start below the sticky header (about 64px tall) so the car is never hidden under it.
+      const top = 88;
+      const freeHeight = Math.max(window.innerHeight - CAR_HEIGHT - top, 0);
       const x = freeWidth * (0.5 + 0.45 * Math.sin(p * Math.PI * 4));
-      const y = freeHeight * p;
+      const y = top + freeHeight * p;
       wrap.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 
       // Turn the car one full rotation over the length of the page.
@@ -76,6 +77,12 @@ export default function M2Float() {
     };
 
     update();
+    // With reduced motion on, the car stays at its starting position and does not follow scroll.
+    if (reduceMotion) {
+      return () => {
+        if (frame) cancelAnimationFrame(frame);
+      };
+    }
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
@@ -90,7 +97,13 @@ export default function M2Float() {
       ref={wrapRef}
       aria-hidden="true"
       className="pointer-events-none fixed left-0 top-0 z-30 hidden md:block"
-      style={{ width: CAR_WIDTH, height: CAR_HEIGHT, display: loaded ? undefined : "none" }}
+      style={{
+        width: CAR_WIDTH,
+        height: CAR_HEIGHT,
+        // Keep the viewer in the layout so it can load, and fade it in once the model is ready.
+        opacity: loaded ? 1 : 0,
+        transition: "opacity 0.6s ease",
+      }}
     >
       <model-viewer
         ref={carRef}
