@@ -6,7 +6,9 @@ const MODEL_SRC = "/models/bmw-m2-g87.glb";
 const MODEL_VIEWER_SCRIPT = "https://cdn.jsdelivr.net/npm/@google/model-viewer@3.4.0/dist/model-viewer.min.js";
 const CAR_WIDTH = 640;
 const CAR_HEIGHT = 400;
-const RIGHT_MARGIN = 24;
+// The model is drawn at SCALE times its box, so the box sits far enough left that the car stays on screen.
+const SCALE = 2.2;
+const CAR_VISUAL_OFFSET_FROM_RIGHT = 540;
 const TOP_OFFSET = 96; // Keeps the car below the sticky header.
 const BOTTOM_OFFSET = 24;
 
@@ -61,7 +63,7 @@ export default function M2Float() {
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const p = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
 
-      const x = Math.max(window.innerWidth - CAR_WIDTH - RIGHT_MARGIN, 0);
+      const x = Math.max(window.innerWidth - CAR_VISUAL_OFFSET_FROM_RIGHT, 0);
       const freeHeight = Math.max(window.innerHeight - CAR_HEIGHT - TOP_OFFSET - BOTTOM_OFFSET, 0);
       const y = TOP_OFFSET + freeHeight * p;
       wrap.style.transform = `translate3d(${x}px, ${y}px, 0)`;
@@ -113,7 +115,14 @@ export default function M2Float() {
         disable-zoom
         disable-pan
         interaction-prompt="none"
-        style={{ width: "100%", height: "100%", background: "transparent", pointerEvents: "none" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          background: "transparent",
+          pointerEvents: "none",
+          transform: `scale(${SCALE})`,
+          transformOrigin: "center",
+        }}
       />
     </div>
   );
