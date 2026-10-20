@@ -52,6 +52,11 @@ export default function PortfolioPage() {
             Admin
           </a>
         </div>
+        <div className="container pb-6">
+          <p className="text-xs text-muted-foreground/70">
+            Car model: BMW M2 g87 [Free] by Black Snow (BlackSnow02), CC BY 4.0, via Sketchfab.
+          </p>
+        </div>
       </footer>
     </div>
   );
