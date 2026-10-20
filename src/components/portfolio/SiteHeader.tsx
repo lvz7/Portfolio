@@ -29,6 +29,10 @@ const navGroups: { label: string; items: NavLink[] }[] = [
     ],
   },
   {
+    label: "Testing",
+    items: [{ label: "Bug Testing", href: "#bug-testing" }],
+  },
+  {
     label: "Archive",
     items: [
       { label: "Koyosan", href: "#koyosan" },
@@ -123,6 +127,12 @@ export default function SiteHeader() {
           </NavLink>
           <NavLink href="#bayview" active={active === "bayview"}>
             Bayview
+          </NavLink>
+
+          <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+
+          <NavLink href="#bug-testing" active={active === "bug-testing"}>
+            Bug Testing
           </NavLink>
 
           <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
