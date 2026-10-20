@@ -7,6 +7,7 @@ import ArchivedProjects from "@/components/portfolio/sections/ArchivedProjects";
 import HydroxSection from "@/components/portfolio/sections/HydroxSection";
 import BayviewSection from "@/components/portfolio/sections/BayviewSection";
 import BugTestingSection from "@/components/portfolio/sections/BugTestingSection";
+import M2Float from "@/components/portfolio/components/M2Float";
 
 import ReviewsSection from "@/components/portfolio/sections/ReviewsSection";
 import ContactSection from "@/components/portfolio/sections/ContactSection";
@@ -34,6 +35,8 @@ export default function PortfolioPage() {
         <ReviewsSection />
         <ContactSection />
       </main>
+
+      <M2Float />
 
       <footer className="border-t border-border">
         <div className="container py-6 flex items-center justify-between">
