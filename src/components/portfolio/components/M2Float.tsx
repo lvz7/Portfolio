@@ -77,6 +77,17 @@ function loadEngineSample(sound: CarSound) {
     });
 }
 
+// Soft clipping curve for the drive stage.
+function makeDriveCurve(amount: number) {
+  const n = 1024;
+  const curve = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const x = (i / (n - 1)) * 2 - 1;
+    curve[i] = Math.tanh(amount * x) / Math.tanh(amount);
+  }
+  return curve;
+}
+
 function createCarSound(): CarSound {
   const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
   const ctx: AudioContext = new AudioCtx();
@@ -119,7 +130,12 @@ function createCarSound(): CarSound {
 
   const sampleGain = ctx.createGain();
   sampleGain.gain.value = 0;
-  sampleGain.connect(master);
+  // A soft-clip stage adds grit, so the recording sounds bigger and growlier when pushed.
+  const drive = ctx.createWaveShaper();
+  drive.curve = makeDriveCurve(3);
+  drive.oversample = "2x";
+  sampleGain.connect(drive);
+  drive.connect(master);
   const result: CarSound = { ctx, master, engineOsc, engineGain, squealGain, noiseBuffer, sampleGain, sample: null };
   loadEngineSample(result);
   return result;
@@ -301,9 +317,10 @@ export default function M2Float() {
                 sound.engineOsc.frequency.setTargetAtTime(pitch, t, throttle ? 0.12 : 0.25);
                 if (sound.sample) {
                   // The recording plays faster under throttle and higher gears, and slower when braking.
-                  const rate = throttle ? 0.85 + gear * 0.1 : brake ? 0.55 : 0.75;
-                  sound.sample.playbackRate.setTargetAtTime(rate, t, throttle ? 0.15 : 0.3);
-                  const vol = engineOn ? (throttle ? 0.9 : brake ? 0.4 : 0.6) : 0;
+                  // Throttle pushes the revs and volume up, and higher gears push them further.
+                  const rate = throttle ? 0.9 + gear * 0.1 : brake ? 0.6 : 0.8;
+                  sound.sample.playbackRate.setTargetAtTime(rate, t, throttle ? 0.1 : 0.3);
+                  const vol = engineOn ? (throttle ? 1.6 + gear * 0.1 : brake ? 0.5 : 1.0) : 0;
                   sound.sampleGain.gain.setTargetAtTime(vol, t, 0.12);
                   sound.engineGain.gain.setTargetAtTime(0, t, 0.05);
                 } else {
