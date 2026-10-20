@@ -20,6 +20,7 @@ const BOTTOM_OFFSET = 24;
 const DOOR_OPEN_ANGLE = (Math.PI * 54) / 180;
 const WHEEL_SPEED = 26; // radians per second
 const SMOKE_RATE = 60; // particles per second
+const ENGINE_SRC = "/sounds/bmw-xm-engine.mp3";
 
 // Loads Three.js and the GLTF loader as plain scripts, once per page.
 let libraryPromise: Promise<void> | null = null;
@@ -54,7 +55,27 @@ type CarSound = {
   engineGain: GainNode;
   squealGain: GainNode;
   noiseBuffer: AudioBuffer;
+  sampleGain: GainNode;
+  sample: AudioBufferSourceNode | null;
 };
+
+// Loads the engine recording and starts it looping. Until it loads, the synth engine is used.
+function loadEngineSample(sound: CarSound) {
+  fetch(ENGINE_SRC)
+    .then((r) => r.arrayBuffer())
+    .then((data) => sound.ctx.decodeAudioData(data))
+    .then((buffer) => {
+      const src = sound.ctx.createBufferSource();
+      src.buffer = buffer;
+      src.loop = true;
+      src.connect(sound.sampleGain);
+      src.start();
+      sound.sample = src;
+    })
+    .catch(() => {
+      // If the file can't load, the synth engine keeps playing.
+    });
+}
 
 function createCarSound(): CarSound {
   const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -96,7 +117,12 @@ function createCarSound(): CarSound {
   squealGain.connect(master);
   noise.start();
 
-  return { ctx, master, engineOsc, engineGain, squealGain, noiseBuffer };
+  const sampleGain = ctx.createGain();
+  sampleGain.gain.value = 0;
+  sampleGain.connect(master);
+  const result: CarSound = { ctx, master, engineOsc, engineGain, squealGain, noiseBuffer, sampleGain, sample: null };
+  loadEngineSample(result);
+  return result;
 }
 
 // A short low thud for when a door opens or closes.
@@ -273,8 +299,17 @@ export default function M2Float() {
                 // Higher gears sit at a higher pitch under throttle.
                 const pitch = throttle ? 70 + gear * 12 : brake ? 40 : idle;
                 sound.engineOsc.frequency.setTargetAtTime(pitch, t, throttle ? 0.12 : 0.25);
-                const level = engineOn ? (throttle ? 0.2 : brake ? 0.07 : 0.12) : 0;
-                sound.engineGain.gain.setTargetAtTime(level, t, 0.12);
+                if (sound.sample) {
+                  // The recording plays faster under throttle and higher gears, and slower when braking.
+                  const rate = throttle ? 0.85 + gear * 0.1 : brake ? 0.55 : 0.75;
+                  sound.sample.playbackRate.setTargetAtTime(rate, t, throttle ? 0.15 : 0.3);
+                  const vol = engineOn ? (throttle ? 0.9 : brake ? 0.4 : 0.6) : 0;
+                  sound.sampleGain.gain.setTargetAtTime(vol, t, 0.12);
+                  sound.engineGain.gain.setTargetAtTime(0, t, 0.05);
+                } else {
+                  const level = engineOn ? (throttle ? 0.2 : brake ? 0.07 : 0.12) : 0;
+                  sound.engineGain.gain.setTargetAtTime(level, t, 0.12);
+                }
                 sound.squealGain.gain.setTargetAtTime(engineOn && throttle ? 0.04 : 0, t, 0.15);
               }
 
