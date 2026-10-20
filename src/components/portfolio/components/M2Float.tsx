@@ -3,7 +3,8 @@ import { useReducedMotion } from "framer-motion";
 
 // A BMW M2 G87 on the right edge of the screen.
 // Scroll: the car moves down the right side and turns.
-// Keys: D opens and closes the doors, L turns the lights on and off.
+// D: opens and closes the doors, with a door sound.
+// E: turns the engine and tire sounds on and off.
 // Wheels spin and the rear tires smoke, like a burnout.
 
 const MODEL_SRC = "/models/bmw-m2-g87.glb";
@@ -43,14 +44,78 @@ function loadLibrary() {
   return libraryPromise;
 }
 
-// True if the object or any of its parents has a name matching the pattern.
-function hasAncestorNamed(obj: any, pattern: RegExp): boolean {
-  let o = obj;
-  while (o) {
-    if (o.name && pattern.test(o.name)) return true;
-    o = o.parent;
-  }
-  return false;
+// Sounds are synthesized in the browser with the Web Audio API, so no audio files are needed.
+// The audio context is created on the first key press, since browsers block sound until a user gesture.
+type CarSound = {
+  ctx: AudioContext;
+  master: GainNode;
+  engineOsc: OscillatorNode;
+  engineGain: GainNode;
+  squealGain: GainNode;
+  noiseBuffer: AudioBuffer;
+};
+
+function createCarSound(): CarSound {
+  const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+  const ctx: AudioContext = new AudioCtx();
+  const master = ctx.createGain();
+  master.gain.value = 0.7;
+  master.connect(ctx.destination);
+
+  // Engine: a low sawtooth through a low-pass filter. Its pitch rises and falls to mimic a rev.
+  const engineOsc = ctx.createOscillator();
+  engineOsc.type = "sawtooth";
+  engineOsc.frequency.value = 48;
+  const engineFilter = ctx.createBiquadFilter();
+  engineFilter.type = "lowpass";
+  engineFilter.frequency.value = 700;
+  engineFilter.Q.value = 2;
+  const engineGain = ctx.createGain();
+  engineGain.gain.value = 0;
+  engineOsc.connect(engineFilter);
+  engineFilter.connect(engineGain);
+  engineGain.connect(master);
+  engineOsc.start();
+
+  // Tire squeal: band-passed white noise, looping, used during the burnout.
+  const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const noise = ctx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  noise.loop = true;
+  const squealFilter = ctx.createBiquadFilter();
+  squealFilter.type = "bandpass";
+  squealFilter.frequency.value = 2100;
+  squealFilter.Q.value = 7;
+  const squealGain = ctx.createGain();
+  squealGain.gain.value = 0;
+  noise.connect(squealFilter);
+  squealFilter.connect(squealGain);
+  squealGain.connect(master);
+  noise.start();
+
+  return { ctx, master, engineOsc, engineGain, squealGain, noiseBuffer };
+}
+
+// A short low thud for when a door opens or closes.
+function playDoorThunk(sound: CarSound) {
+  const { ctx, master, noiseBuffer } = sound;
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuffer;
+  const lp = ctx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 260;
+  const env = ctx.createGain();
+  const now = ctx.currentTime;
+  env.gain.setValueAtTime(0.0001, now);
+  env.gain.exponentialRampToValueAtTime(0.9, now + 0.01);
+  env.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+  src.connect(lp);
+  lp.connect(env);
+  env.connect(master);
+  src.start(now, Math.random());
+  src.stop(now + 0.3);
 }
 
 export default function M2Float() {
@@ -59,8 +124,8 @@ export default function M2Float() {
   const [loaded, setLoaded] = useState(false);
   const reduceMotion = useReducedMotion();
 
-  // Holds the scene state the key handler and animation loop need.
-  const controls = useRef({ doorsOpen: false, lightsOn: false });
+  // The key handler and animation loop read this state.
+  const controls = useRef({ doorsOpen: false, engineOn: false });
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -71,6 +136,7 @@ export default function M2Float() {
     let frame = 0;
     let renderer: any = null;
     let lastTime = performance.now();
+    let sound: CarSound | null = null;
     const cleanups: Array<() => void> = [];
 
     loadLibrary()
@@ -102,9 +168,7 @@ export default function M2Float() {
         const carRoot = new THREE.Group();
         scene.add(carRoot);
 
-        // Glow sprites for the lights.
-        const glowTexture = makeGlowTexture(THREE);
-        const glows: any[] = [];
+        const smokeTexture = makeSmokeTexture(THREE);
 
         const loader = new THREE.GLTFLoader();
         loader.load(
@@ -123,11 +187,7 @@ export default function M2Float() {
 
             const wheelPivots = setupWheels(THREE, model, carRoot);
             const doorPivots = setupDoors(THREE, model, carRoot);
-            const lightMeshes = setupLights(THREE, model);
-            setupFlares(THREE, model, carRoot, glowTexture, glows);
-
-            // Smoke from the rear tires.
-            const smoke = setupSmoke(THREE, carRoot, glowTexture);
+            const smoke = setupSmoke(THREE, carRoot, smokeTexture);
 
             setLoaded(true);
 
@@ -154,15 +214,6 @@ export default function M2Float() {
                 d.pivot.rotation.y = d.sign * DOOR_OPEN_ANGLE * d.t;
               });
 
-              // Lights switch on and off.
-              const lightsOn = controls.current.lightsOn;
-              lightMeshes.forEach((m: any) => {
-                m.material.emissiveIntensity = lightsOn ? m.onIntensity : 0;
-              });
-              glows.forEach((g: any) => {
-                g.material.opacity = lightsOn ? g.onOpacity : 0;
-              });
-
               // Wheels spin, and the rear tires smoke.
               if (!reduceMotion) {
                 wheelPivots.forEach((w: any) => {
@@ -171,20 +222,37 @@ export default function M2Float() {
                 smoke.update(dt, wheelPivots.filter((w: any) => w.rear));
               }
 
+              // Engine and burnout sounds follow the engine toggle.
+              if (sound) {
+                const engineOn = controls.current.engineOn;
+                const t = sound.ctx.currentTime;
+                // A slow swell in pitch, so the idle sounds alive instead of flat.
+                const rev = 48 + 14 * Math.abs(Math.sin(now * 0.0016));
+                sound.engineOsc.frequency.setTargetAtTime(rev, t, 0.05);
+                sound.engineGain.gain.setTargetAtTime(engineOn ? 0.12 : 0, t, 0.15);
+                sound.squealGain.gain.setTargetAtTime(engineOn ? 0.035 : 0, t, 0.2);
+              }
+
               renderer.render(scene, camera);
             };
             frame = requestAnimationFrame(animate);
 
-            // Keys: D for doors, L for lights.
+            // Keys: D for doors, E for engine sound.
             const onKey = (e: KeyboardEvent) => {
               if (e.ctrlKey || e.metaKey || e.altKey) return;
               const target = e.target as HTMLElement | null;
               if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+
               if (e.key === "d" || e.key === "D") {
                 controls.current.doorsOpen = !controls.current.doorsOpen;
+                if (!sound) sound = createCarSound();
+                if (sound.ctx.state === "suspended") sound.ctx.resume();
+                playDoorThunk(sound);
               }
-              if (e.key === "l" || e.key === "L") {
-                controls.current.lightsOn = !controls.current.lightsOn;
+              if (e.key === "e" || e.key === "E") {
+                controls.current.engineOn = !controls.current.engineOn;
+                if (!sound) sound = createCarSound();
+                if (sound.ctx.state === "suspended") sound.ctx.resume();
               }
             };
             window.addEventListener("keydown", onKey);
@@ -204,6 +272,10 @@ export default function M2Float() {
       disposed = true;
       cancelAnimationFrame(frame);
       cleanups.forEach((c) => c());
+      if (sound) {
+        sound.ctx.close();
+        sound = null;
+      }
       if (renderer) {
         renderer.dispose();
         if (renderer.domElement && renderer.domElement.parentNode) {
@@ -211,7 +283,7 @@ export default function M2Float() {
         }
       }
     };
-    // The scene is built once. Reduced motion is read each frame via the ref below.
+    // The scene is built once. Reduced motion is read when the scene is set up.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -232,7 +304,7 @@ export default function M2Float() {
   );
 }
 
-function makeGlowTexture(THREE: any) {
+function makeSmokeTexture(THREE: any) {
   const size = 128;
   const canvas = document.createElement("canvas");
   canvas.width = size;
@@ -306,55 +378,6 @@ function setupDoors(THREE: any, model: any, carRoot: any) {
     result.push({ pivot, sign: side === "R" ? 1 : -1, t: 0 });
   });
   return result;
-}
-
-// Finds headlight and taillight meshes and gives each its own material so only they glow.
-function setupLights(THREE: any, model: any) {
-  const lights: any[] = [];
-  const lightPattern = /^m2g87undg_(headlight|taillight)_/;
-  const glassPattern = /^m2g87undg_(headlight|taillight)glass/;
-  model.traverse((o: any) => {
-    if (!o.isMesh) return;
-    const isLight = hasAncestorNamed(o, lightPattern) || hasAncestorNamed(o, glassPattern);
-    if (!isLight) return;
-    const isHead = hasAncestorNamed(o, /headlight/);
-    const mat = o.material.clone();
-    mat.emissive = new THREE.Color(isHead ? 0xfff1d0 : 0xff2a2a);
-    mat.emissiveIntensity = 0;
-    o.material = mat;
-    lights.push({ material: mat, onIntensity: isHead ? 1.6 : 1.2 });
-  });
-  return lights;
-}
-
-// Adds soft glows at the headlights and taillights, shown when the lights are on.
-function setupFlares(THREE: any, model: any, carRoot: any, texture: any, glows: any[]) {
-  // One glow per headlight and taillight, placed at the centre of each light part.
-  const spots: Array<{ pos: any; color: number; size: number }> = [];
-  const lightPattern = /^m2g87undg_(headlight|taillight)_(L|R)_\d+$/;
-  model.traverse((o: any) => {
-    const m = o.name && o.name.match(lightPattern);
-    if (!m) return;
-    const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
-    const isHead = m[1] === "headlight";
-    spots.push({ pos: c, color: isHead ? 0xfff1d0 : 0xff2a2a, size: isHead ? 0.16 : 0.12 });
-  });
-  spots.forEach((s) => {
-    const mat = new THREE.SpriteMaterial({
-      map: texture,
-      color: s.color,
-      transparent: true,
-      opacity: 0,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
-    const sprite = new THREE.Sprite(mat);
-    sprite.position.copy(s.pos);
-    sprite.scale.set(s.size, s.size, 1);
-    carRoot.add(sprite);
-    glows.push({ material: mat, onOpacity: 0.45 });
-  });
-  return spots;
 }
 
 // Smoke puffs that rise from the rear tires.

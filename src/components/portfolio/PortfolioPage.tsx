@@ -54,7 +54,7 @@ export default function PortfolioPage() {
         </div>
         <div className="container pb-6">
           <p className="text-xs text-muted-foreground/70">
-            Car model: BMW M2 g87 [Free] by Black Snow (BlackSnow02), CC BY 4.0, via Sketchfab. Press D for doors and L for lights.
+            Car model: BMW M2 g87 [Free] by Black Snow (BlackSnow02), CC BY 4.0, via Sketchfab. Press D for doors and E for engine sound.
           </p>
         </div>
       </footer>
