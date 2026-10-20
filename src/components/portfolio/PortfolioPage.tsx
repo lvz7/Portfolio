@@ -5,7 +5,6 @@ import GallerySection from "@/components/portfolio/sections/GallerySection";
 import LuziStudiosSection from "@/components/portfolio/sections/LuziStudiosSection";
 import ArchivedProjects from "@/components/portfolio/sections/ArchivedProjects";
 import HydroxSection from "@/components/portfolio/sections/HydroxSection";
-import BayviewSection from "@/components/portfolio/sections/BayviewSection";
 import BugTestingSection from "@/components/portfolio/sections/BugTestingSection";
 import M2Float from "@/components/portfolio/components/M2Float";
 
@@ -29,7 +28,6 @@ export default function PortfolioPage() {
         <GallerySection />
         <LuziStudiosSection />
         <HydroxSection />
-        <BayviewSection />
         <BugTestingSection />
         <ArchivedProjects />
         <ReviewsSection />

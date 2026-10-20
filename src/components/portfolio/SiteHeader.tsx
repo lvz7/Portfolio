@@ -25,7 +25,6 @@ const navGroups: { label: string; items: NavLink[] }[] = [
     label: "Projects",
     items: [
       { label: "Hydrox Community", href: "#hydrox" },
-      { label: "Bayview County", href: "#bayview" },
     ],
   },
   {
@@ -103,7 +102,7 @@ export default function SiteHeader() {
           />
           <div className="leading-tight">
             <div className="font-display text-sm font-semibold tracking-wide">Luzi</div>
-            <div className="text-xs text-muted-foreground">Designs • Hydrox • Bayview</div>
+            <div className="text-xs text-muted-foreground">Designs • Hydrox</div>
           </div>
         </a>
 
@@ -125,12 +124,6 @@ export default function SiteHeader() {
           <NavLink href="#hydrox" active={active === "hydrox"}>
             Hydrox
           </NavLink>
-          <NavLink href="#bayview" active={active === "bayview"}>
-            Bayview
-          </NavLink>
-
-          <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
-
           <NavLink href="#bug-testing" active={active === "bug-testing"}>
             Bug Testing
           </NavLink>
