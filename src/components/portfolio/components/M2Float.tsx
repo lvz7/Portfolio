@@ -4,7 +4,7 @@ import { useReducedMotion } from "framer-motion";
 // A BMW M2 G87 on the right edge of the screen.
 // Scroll: the car moves down the right side and turns.
 // D: opens and closes the doors, with a door sound.
-// E: turns the engine and tire sounds on and off.
+// E: turns the engine on and off. W: accelerate (revs and tire squeal). S: brake.
 // Wheels spin and the rear tires smoke, like a burnout.
 
 const MODEL_SRC = "/models/bmw-m2-g87.glb";
@@ -118,6 +118,27 @@ function playDoorThunk(sound: CarSound) {
   src.stop(now + 0.3);
 }
 
+// A short squeal for braking, played once when S is pressed.
+function playBrakeSqueal(sound: CarSound) {
+  const { ctx, master, noiseBuffer } = sound;
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuffer;
+  const bp = ctx.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.frequency.value = 1500;
+  bp.Q.value = 5;
+  const env = ctx.createGain();
+  const now = ctx.currentTime;
+  env.gain.setValueAtTime(0.0001, now);
+  env.gain.exponentialRampToValueAtTime(0.25, now + 0.03);
+  env.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+  src.connect(bp);
+  bp.connect(env);
+  env.connect(master);
+  src.start(now, Math.random());
+  src.stop(now + 0.55);
+}
+
 export default function M2Float() {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
@@ -125,7 +146,7 @@ export default function M2Float() {
   const reduceMotion = useReducedMotion();
 
   // The key handler and animation loop read this state.
-  const controls = useRef({ doorsOpen: false, engineOn: false });
+  const controls = useRef({ doorsOpen: false, engineOn: false, throttle: false, brake: false });
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -222,15 +243,17 @@ export default function M2Float() {
                 smoke.update(dt, wheelPivots.filter((w: any) => w.rear));
               }
 
-              // Engine and burnout sounds follow the engine toggle.
+              // Engine sound: E turns it on. W revs it and adds tire squeal. S lowers the pitch.
               if (sound) {
-                const engineOn = controls.current.engineOn;
+                const { engineOn, throttle, brake } = controls.current;
                 const t = sound.ctx.currentTime;
-                // A slow swell in pitch, so the idle sounds alive instead of flat.
-                const rev = 48 + 14 * Math.abs(Math.sin(now * 0.0016));
-                sound.engineOsc.frequency.setTargetAtTime(rev, t, 0.05);
-                sound.engineGain.gain.setTargetAtTime(engineOn ? 0.12 : 0, t, 0.15);
-                sound.squealGain.gain.setTargetAtTime(engineOn ? 0.035 : 0, t, 0.2);
+                // A slow swell in idle pitch, so the idle sounds alive instead of flat.
+                const idle = 48 + 6 * Math.abs(Math.sin(now * 0.0016));
+                const pitch = throttle ? 110 : brake ? 40 : idle;
+                sound.engineOsc.frequency.setTargetAtTime(pitch, t, throttle ? 0.12 : 0.25);
+                const level = engineOn ? (throttle ? 0.2 : brake ? 0.07 : 0.12) : 0;
+                sound.engineGain.gain.setTargetAtTime(level, t, 0.12);
+                sound.squealGain.gain.setTargetAtTime(engineOn && throttle ? 0.04 : 0, t, 0.15);
               }
 
               renderer.render(scene, camera);
@@ -242,21 +265,44 @@ export default function M2Float() {
               if (e.ctrlKey || e.metaKey || e.altKey) return;
               const target = e.target as HTMLElement | null;
               if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+              const key = e.key.toLowerCase();
 
-              if (e.key === "d" || e.key === "D") {
+              if (key === "d") {
                 controls.current.doorsOpen = !controls.current.doorsOpen;
                 if (!sound) sound = createCarSound();
                 if (sound.ctx.state === "suspended") sound.ctx.resume();
                 playDoorThunk(sound);
               }
-              if (e.key === "e" || e.key === "E") {
+              if (key === "e") {
                 controls.current.engineOn = !controls.current.engineOn;
                 if (!sound) sound = createCarSound();
                 if (sound.ctx.state === "suspended") sound.ctx.resume();
               }
+              if (key === "w" || key === "s") {
+                if (!sound) sound = createCarSound();
+                if (sound.ctx.state === "suspended") sound.ctx.resume();
+                if (key === "w") controls.current.throttle = true;
+                if (key === "s") {
+                  controls.current.brake = true;
+                  if (!e.repeat) playBrakeSqueal(sound);
+                }
+              }
+            };
+            const onKeyUp = (e: KeyboardEvent) => {
+              const key = e.key.toLowerCase();
+              if (key === "w") controls.current.throttle = false;
+              if (key === "s") controls.current.brake = false;
+            };
+            const onBlur = () => {
+              controls.current.throttle = false;
+              controls.current.brake = false;
             };
             window.addEventListener("keydown", onKey);
+            window.addEventListener("keyup", onKeyUp);
+            window.addEventListener("blur", onBlur);
             cleanups.push(() => window.removeEventListener("keydown", onKey));
+            cleanups.push(() => window.removeEventListener("keyup", onKeyUp));
+            cleanups.push(() => window.removeEventListener("blur", onBlur));
           },
           undefined,
           () => {
@@ -414,8 +460,9 @@ function setupSmoke(THREE: any, carRoot: any, texture: any) {
             wheel.position.y - 0.25,
             wheel.position.z - 0.2,
           );
-          puff.vel.set((Math.random() - 0.5) * 0.25, 0.18 + Math.random() * 0.14, -0.9 - Math.random() * 0.8);
-          puff.maxLife = 0.9 + Math.random() * 0.6;
+          // Short, slow puffs stay inside the render box so they fade out instead of being cut off.
+          puff.vel.set((Math.random() - 0.5) * 0.12, 0.1 + Math.random() * 0.08, -0.3 - Math.random() * 0.25);
+          puff.maxLife = 0.6 + Math.random() * 0.4;
           puff.life = puff.maxLife;
           puff.sprite.visible = true;
         }
@@ -431,9 +478,10 @@ function setupSmoke(THREE: any, carRoot: any, texture: any) {
         const age = 1 - p.life / p.maxLife;
         p.sprite.position.addScaledVector(p.vel, dt);
         p.vel.multiplyScalar(1 - dt * 0.6);
-        const s = 0.3 + age * 0.9;
+        const s = 0.25 + age * 0.6;
         p.sprite.scale.set(s, s, 1);
-        p.sprite.material.opacity = 0.5 * (1 - age);
+        // Fade in quickly, then fade out, so no puff pops in or disappears with a hard edge.
+        p.sprite.material.opacity = 0.45 * Math.min(age / 0.15, 1) * (1 - age);
       });
     },
   };
