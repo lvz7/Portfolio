@@ -4,8 +4,8 @@ import { useReducedMotion } from "framer-motion";
 // The car lives on the right edge of the screen. It moves up and down with the page and turns as you scroll.
 const MODEL_SRC = "/models/bmw-m2-g87.glb";
 const MODEL_VIEWER_SCRIPT = "https://cdn.jsdelivr.net/npm/@google/model-viewer@3.4.0/dist/model-viewer.min.js";
-const CAR_WIDTH = 480;
-const CAR_HEIGHT = 300;
+const CAR_WIDTH = 640;
+const CAR_HEIGHT = 400;
 const RIGHT_MARGIN = 24;
 const TOP_OFFSET = 96; // Keeps the car below the sticky header.
 const BOTTOM_OFFSET = 24;
@@ -107,10 +107,9 @@ export default function M2Float() {
         src={MODEL_SRC}
         alt="BMW M2 G87 in Voodoo Blue"
         camera-orbit="0deg 75deg 110%"
-        environment-image="neutral"
-        tone-mapping="neutral"
-        exposure="1.1"
-        shadow-intensity="0.6"
+        exposure="1.3"
+        shadow-intensity="0"
+        shadow-softness="0"
         disable-zoom
         disable-pan
         interaction-prompt="none"
