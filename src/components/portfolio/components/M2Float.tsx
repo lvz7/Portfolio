@@ -95,7 +95,7 @@ export default function M2Float() {
       <model-viewer
         ref={carRef}
         src={MODEL_SRC}
-        alt="BMW M2 G87 in Voodoo Blue"
+        alt="BMW M2 G87"
         camera-orbit="0deg 75deg 105%"
         disable-zoom
         disable-pan
@@ -106,7 +106,7 @@ export default function M2Float() {
       />
       {loaded && (
         <p className="absolute bottom-0 left-0 text-[10px] text-muted-foreground/60">
-          Model: Black Snow (BlackSnow02), CC Attribution, Sketchfab
+          Model: Black Snow (BlackSnow02), CC BY 4.0, via Sketchfab
         </p>
       )}
     </div>
