@@ -263,8 +263,8 @@ export class CarAudio {
     if (up && this.rpm > 0.5) this.queuePops(1 + Math.floor(Math.random() * 2), 0.22);
   }
 
-  // One tone with a fast fade, used for the ring of metal in a crash.
-  private tone(freq: number, peak: number, decay: number, delay = 0, type: OscillatorType = "sine") {
+  // One tone for the ring of metal in a crash. It rings out on a gentle exponential tail.
+  private tone(freq: number, peak: number, tau: number, delay = 0, type: OscillatorType = "sine") {
     const { ctx } = this;
     const t = ctx.currentTime + delay;
     const osc = ctx.createOscillator();
@@ -273,63 +273,86 @@ export class CarAudio {
     const env = ctx.createGain();
     env.gain.setValueAtTime(0.0001, t);
     env.gain.exponentialRampToValueAtTime(peak, t + 0.004);
-    env.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+    env.gain.setTargetAtTime(0.0001, t + 0.004, tau);
     osc.connect(env);
     env.connect(this.master);
     osc.start(t);
-    osc.stop(t + decay + 0.05);
+    osc.stop(t + tau * 8 + 0.05);
+  }
+
+  // Filtered noise with a sharp hit and a long tail, for the body of a crash.
+  private impactNoise(type: BiquadFilterType, freq: number, peak: number, tau: number, q = 0.7) {
+    const { ctx } = this;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    const f = ctx.createBiquadFilter();
+    f.type = type;
+    f.frequency.value = freq;
+    f.Q.value = q;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(peak, t + 0.003);
+    env.gain.setTargetAtTime(0.0001, t + 0.003, tau);
+    src.connect(f);
+    f.connect(env);
+    env.connect(this.master);
+    src.start(t, Math.random());
+    src.stop(t + tau * 8 + 0.05);
   }
 
   // A crash into a barrier. Strength runs from 0 (a bump) to 1 (flat out). It is built from a deep
-  // thud, a crunch of noise, a ring of metal and scattered debris, and it knocks the engine down.
+  // thud, a crunch of noise, a low rumble, a ring of metal and scattered debris, and it knocks the
+  // engine down so the impact stands out.
   crash(strength: number) {
     const { ctx } = this;
     const s = clamp(strength, 0.12, 1);
     const t = ctx.currentTime;
 
-    // The thud: a sine that drops fast in pitch.
+    // The thud: a sine that drops fast in pitch, with a tail that stays audible.
     const thud = ctx.createOscillator();
     thud.type = "sine";
-    thud.frequency.setValueAtTime(135, t);
-    thud.frequency.exponentialRampToValueAtTime(34, t + 0.34);
+    thud.frequency.setValueAtTime(140, t);
+    thud.frequency.exponentialRampToValueAtTime(32, t + 0.4);
     const thudEnv = ctx.createGain();
     thudEnv.gain.setValueAtTime(0.0001, t);
-    thudEnv.gain.exponentialRampToValueAtTime(0.75 * s, t + 0.006);
-    thudEnv.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+    thudEnv.gain.exponentialRampToValueAtTime(1.0 * s, t + 0.005);
+    thudEnv.gain.setTargetAtTime(0.0001, t + 0.005, 0.11);
     thud.connect(thudEnv);
     thudEnv.connect(this.master);
     thud.start(t);
-    thud.stop(t + 0.46);
+    thud.stop(t + 1.0);
 
-    // The crunch: a body of noise that darkens as it dies away.
-    this.burst({ type: "lowpass", freq: 1200 + 900 * s, q: 0.7, peak: 0.7 * s, attack: 0.004, decay: 0.3 + 0.3 * s });
-    // The snap of the first contact.
-    this.burst({ type: "highpass", freq: 2200, q: 0.8, peak: 0.4 * s, attack: 0.002, decay: 0.09 });
+    // The crunch: a body of noise that darkens as it dies away, and the sharp snap of first contact.
+    this.impactNoise("lowpass", 1200 + 900 * s, 0.95 * s, 0.09 + 0.08 * s);
+    this.impactNoise("highpass", 2200, 0.5 * s, 0.025, 0.8);
+    // A low rumble underneath, so a big hit has weight.
+    this.impactNoise("lowpass", 240, 0.8 * s, 0.22);
 
     // The ring of bent metal: a few inharmonic tones that fade at different speeds.
     const detune = 0.92 + Math.random() * 0.16;
     [412, 655, 1043, 1530].forEach((f, i) => {
-      this.tone(f * detune, 0.1 * s, 0.28 + 0.12 * (3 - i) * s, i * 0.004, i % 2 ? "triangle" : "sine");
+      this.tone(f * detune, 0.13 * s, 0.07 + 0.06 * (3 - i) * s + 0.04, i * 0.004, i % 2 ? "triangle" : "sine");
     });
 
     // Debris and glass: small bright ticks scattered over the next half second.
-    const ticks = 3 + Math.floor(s * 6);
+    const ticks = 3 + Math.floor(s * 7);
     for (let i = 0; i < ticks; i++) {
       this.burst({
         type: "highpass",
         freq: 2500 + Math.random() * 2500,
         q: 0.9,
-        peak: (0.07 + Math.random() * 0.12) * s,
+        peak: (0.08 + Math.random() * 0.13) * s,
         attack: 0.002,
         decay: 0.03 + Math.random() * 0.04,
         delay: 0.05 + Math.random() * 0.55,
       });
     }
 
-    // The engine gets knocked down and chokes for a moment. The pull-off clip is cut so it can't
-    // keep playing through the impact.
+    // The engine gets knocked down and chokes for a moment, so the impact stands out. The
+    // pull-off clip is cut so it can't keep playing through the hit.
     this.rpm *= 0.5;
-    this.shiftDip = 0.18 + 0.25 * s;
+    this.shiftDip = 0.25 + 0.35 * s;
     this.stopPullOff(0.08);
     this.prevThrottle = false;
   }

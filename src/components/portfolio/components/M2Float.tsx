@@ -13,7 +13,9 @@ import { CarAudio, prefetchCarSounds } from "./carAudio";
 // Drive mode (G, or the Drive button): the car leaves the right edge and you drive it
 // around the whole page. W/Up gas, S/Down brake and reverse, A/Left and D/Right steer,
 // Q/E change gear (each gear raises the top speed), F opens the doors, Esc parks it.
-// The page scrolls to follow the car, and the car can't leave the page.
+// The page scrolls to follow the car, and the car can't leave the page. The left and right edges
+// have barriers. Hitting one fast is a crash (sound, sparks, dust, shake, a flash, and the car
+// bounces back). Scraping along one is a grind with a trail of sparks.
 
 const MODEL_SRC = "/models/bmw-m2-g87.glb";
 const THREE_SRC = "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js";
@@ -40,6 +42,10 @@ const EDGE_MARGIN = 115; // How close the car centre can get to the page edge (a
 const PX_PER_UNIT = 44; // Roughly how many screen pixels one model unit covers while driving.
 const WHEEL_RADIUS = 0.35; // Model units.
 const KMH_PER_PX = 0.22; // Only used for the speed readout.
+const CRASH_MIN_SPEED = 140; // Speed into a barrier (px/s) above which it counts as a crash, not a scrape.
+const CRASH_FULL_SPEED = 600; // Extra speed on top of that for a full-strength crash.
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 // Takes the short way round when blending two angles.
 function lerpAngle(a: number, b: number, t: number) {
@@ -76,6 +82,7 @@ export default function M2Float() {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const hudRef = useRef<HTMLSpanElement | null>(null);
   const driveApi = useRef<{ toggle: () => void } | null>(null);
+  const flashRef = useRef<HTMLDivElement | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [driving, setDriving] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -162,6 +169,7 @@ export default function M2Float() {
             const wheelPivots = setupWheels(THREE, model, carRoot);
             const doorPivots = setupDoors(THREE, model, carRoot);
             const smoke = setupSmoke(THREE, carRoot, smokeTexture);
+            const impactFx = setupImpactFx(THREE, scene, smokeTexture);
 
             // A soft shadow on the "ground" under the car, so it reads as driving over the page.
             const carSize = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
@@ -189,12 +197,29 @@ export default function M2Float() {
               hudTimer: 0,
               lastCx: 0,
               lastCy: 0,
+              crashCooldown: 0, // seconds before another crash can register
+              shake: 0, // 0 to 1, decays after a crash
+              scrape: 0, // 0 to 1, how hard the car is grinding along a barrier
+              sparkAcc: 0,
             };
 
             const ensureSound = () => {
               if (!sound) sound = new CarAudio();
               sound.resume();
               return sound;
+            };
+
+            // A red glow on the edge of the screen that was hit. Skipped for reduced motion.
+            const triggerFlash = (nx: number, nz: number, strength: number) => {
+              const el = flashRef.current;
+              if (!el || reduceMotion) return;
+              const dir = nx < 0 ? "to right" : nx > 0 ? "to left" : nz < 0 ? "to bottom" : "to top";
+              el.style.background = `linear-gradient(${dir}, rgba(255,80,50,0.75), rgba(255,80,50,0) 32%)`;
+              el.style.transition = "none";
+              el.style.opacity = String(0.4 + 0.6 * strength);
+              void el.offsetWidth; // makes the browser register the jump before it fades out
+              el.style.transition = "opacity 0.55s ease-out";
+              el.style.opacity = "0";
             };
 
             const setDrive = (on: boolean) => {
@@ -275,20 +300,57 @@ export default function M2Float() {
                 drive.wx += Math.sin(drive.heading) * v * dt;
                 drive.wy += Math.cos(drive.heading) * v * dt;
 
-                // Walls: the car stays on the page and loses speed when it hits an edge.
+                // Barriers: the car stays on the page. Hit one fast and it is a crash. Slide along one
+                // and it grinds, losing speed only in proportion to how head-on it is.
                 const docH = document.documentElement.scrollHeight;
                 const minX = EDGE_MARGIN;
                 const maxX = Math.max(window.innerWidth - EDGE_MARGIN, minX);
                 const minY = EDGE_MARGIN;
                 const maxY = Math.max(docH - EDGE_MARGIN, minY);
-                // How head-on the hit is decides how much speed is lost, so a car scraping along an
-                // edge keeps most of its speed and one driving straight into it stops quickly.
-                let headOn = 0;
-                if (drive.wx < minX) { drive.wx = minX; headOn = Math.max(headOn, Math.abs(Math.sin(drive.heading))); }
-                if (drive.wx > maxX) { drive.wx = maxX; headOn = Math.max(headOn, Math.abs(Math.sin(drive.heading))); }
-                if (drive.wy < minY) { drive.wy = minY; headOn = Math.max(headOn, Math.abs(Math.cos(drive.heading))); }
-                if (drive.wy > maxY) { drive.wy = maxY; headOn = Math.max(headOn, Math.abs(Math.cos(drive.heading))); }
-                if (headOn > 0) v *= 1 - Math.min(1, headOn * 4.5 * dt);
+                let hitNx = 0; // which way the barrier is, on screen (x right, z down)
+                let hitNz = 0;
+                if (drive.wx < minX) { drive.wx = minX; hitNx = -1; }
+                if (drive.wx > maxX) { drive.wx = maxX; hitNx = 1; }
+                if (drive.wy < minY) { drive.wy = minY; hitNz = -1; }
+                if (drive.wy > maxY) { drive.wy = maxY; hitNz = 1; }
+
+                drive.crashCooldown = Math.max(0, drive.crashCooldown - dt);
+                let scrape = 0;
+                if (hitNx !== 0 || hitNz !== 0) {
+                  const dirX = Math.sin(drive.heading);
+                  const dirZ = Math.cos(drive.heading);
+                  const into = Math.max(0, dirX * v * hitNx + dirZ * v * hitNz); // speed towards the barrier
+                  const headOn = Math.abs(v) > 1 ? into / Math.abs(v) : 0; // 1 = head-on, 0 = sliding along it
+
+                  if (into > CRASH_MIN_SPEED && drive.crashCooldown <= 0) {
+                    const strength = clamp01((into - CRASH_MIN_SPEED) / CRASH_FULL_SPEED);
+                    drive.crashCooldown = 0.5;
+                    // Bounce back, and swing the nose away from the barrier.
+                    const swing = (0.1 + 0.3 * strength) * (hitNx !== 0 && hitNz !== 0 ? 0.6 : 1);
+                    const turn = (Math.cos(drive.heading) * hitNx - Math.sin(drive.heading) * hitNz) * Math.sign(v);
+                    drive.heading += (turn === 0 ? (Math.random() < 0.5 ? -1 : 1) : turn > 0 ? -1 : 1) * swing;
+                    v = -v * (0.14 + 0.26 * strength);
+                    drive.shake = Math.max(drive.shake, 0.35 + 0.65 * strength);
+                    impactFx.burst(hitNx, hitNz, strength);
+                    ensureSound().crash(strength);
+                    triggerFlash(hitNx, hitNz, strength);
+                  } else if (into > 0) {
+                    v *= 1 - Math.min(1, headOn * 4.5 * dt);
+                  }
+
+                  // Grinding along the barrier: a scrape and a trail of sparks.
+                  if (Math.abs(v) > 60 && drive.crashCooldown <= 0) {
+                    scrape = clamp01((Math.abs(v) - 60) / 450) * (1 - headOn);
+                    drive.sparkAcc += scrape * 70 * dt;
+                    const n = Math.floor(drive.sparkAcc);
+                    if (n > 0) {
+                      drive.sparkAcc -= n;
+                      const s = Math.sign(v);
+                      impactFx.scrape(hitNx, hitNz, dirX * s, dirZ * s, n);
+                    }
+                  }
+                }
+                drive.scrape = scrape;
                 drive.speed = v;
 
                 // The page scrolls to keep the car in the middle band of the screen.
@@ -317,8 +379,15 @@ export default function M2Float() {
               drive.lastCx = cx;
               drive.lastCy = cy;
               const scale = 1 + (DRIVE_SCALE - 1) * b;
-              wrap.style.transform = `translate3d(${cx - CAR_WIDTH / 2}px, ${cy - CAR_HEIGHT / 2}px, 0) scale(${scale})`;
-              carRoot.rotation.y = lerpAngle(dockRot, drive.heading, b);
+              // Screen shake after a crash. It fades fast, and is off for reduced motion.
+              const shake = reduceMotion ? 0 : drive.shake;
+              drive.shake *= Math.exp(-dt * 6);
+              if (drive.shake < 0.01) drive.shake = 0;
+              const shakeX = (Math.random() - 0.5) * 2 * shake * 18;
+              const shakeY = (Math.random() - 0.5) * 2 * shake * 18;
+              wrap.style.transform = `translate3d(${cx - CAR_WIDTH / 2 + shakeX}px, ${cy - CAR_HEIGHT / 2 + shakeY}px, 0) scale(${scale})`;
+              carRoot.rotation.y = lerpAngle(dockRot, drive.heading, b) + (Math.random() - 0.5) * shake * 0.14;
+              impactFx.update(dt);
               shadowMat.opacity = 0.5 * b;
 
               camPos.lerpVectors(dockCamPos, driveCamPos, b);
@@ -368,6 +437,7 @@ export default function M2Float() {
                   speed: isDriving ? drive.speed : 0,
                   topSpeed: GEAR_TOP_SPEED[gear] ?? GEAR_TOP_SPEED[3],
                   slide: slideSmoke,
+                  scrape: isDriving ? drive.scrape : 0,
                 });
               }
 
@@ -503,6 +573,28 @@ export default function M2Float() {
         <div ref={mountRef} style={{ width: CAR_WIDTH, height: CAR_HEIGHT }} />
       </div>
 
+      {/* Barriers along the left and right edges while driving. */}
+      {(["left-0", "right-0"] as const).map((side) => (
+        <div
+          key={side}
+          aria-hidden="true"
+          className={`pointer-events-none fixed inset-y-0 ${side} z-[34] hidden w-[14px] lg:block`}
+          style={{
+            opacity: loaded && driving ? 1 : 0,
+            transition: "opacity 0.4s ease",
+            backgroundImage: "repeating-linear-gradient(135deg, #e5484d 0 14px, #f4f4f5 14px 28px)",
+            boxShadow: "0 0 18px rgba(229,72,77,0.45)",
+          }}
+        />
+      ))}
+      {/* Flashes red on the edge that was hit in a crash. */}
+      <div
+        ref={flashRef}
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-[36] hidden lg:block"
+        style={{ opacity: 0 }}
+      />
+
       {loaded && (
         <div className="fixed bottom-4 left-4 z-40 hidden items-center gap-3 lg:flex">
           <button
@@ -529,6 +621,130 @@ export default function M2Float() {
       )}
     </>
   );
+}
+
+// Sparks and dust thrown off when the car hits a barrier. They live in the scene rather than on the
+// car, so they stay where the crash happened when the car spins away. Positions are in model units
+// from the car's centre, with x to the right and z down the screen (the drive camera looks straight down).
+type Particle = { sprite: any; life: number; maxLife: number; size: number; vel: any };
+type ParticlePool = { list: Particle[]; next: number };
+
+function setupImpactFx(THREE: any, scene: any, texture: any) {
+  const REACH = 1.9; // how far the contact point is from the car's centre
+  const make = (count: number, additive: boolean, color: number) => {
+    const list: Particle[] = [];
+    for (let i = 0; i < count; i++) {
+      const mat = new THREE.SpriteMaterial({
+        map: texture,
+        color,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+      });
+      const sprite = new THREE.Sprite(mat);
+      sprite.visible = false;
+      scene.add(sprite);
+      list.push({ sprite, life: 0, maxLife: 1, size: 0.1, vel: new THREE.Vector3() });
+    }
+    return { list, next: 0 } as ParticlePool;
+  };
+  const sparks = make(64, true, 0xffa43a);
+  const dust = make(24, false, 0xb9bec8);
+
+  const spawn = (pool: ParticlePool, x: number, z: number, vx: number, vz: number, life: number, size: number) => {
+    const p = pool.list[pool.next];
+    pool.next = (pool.next + 1) % pool.list.length;
+    p.sprite.position.set(x, 1.7, z); // above the roof so they always draw over the car
+    p.vel.set(vx, 0, vz);
+    p.maxLife = life;
+    p.life = life;
+    p.size = size;
+    p.sprite.visible = true;
+  };
+
+  return {
+    // A crash: a burst of sparks and a puff of dust at the contact point, thrown away from the barrier.
+    burst(nx: number, nz: number, strength: number) {
+      const cx = nx * REACH;
+      const cz = nz * REACH;
+      const tx = -nz; // along the barrier
+      const tz = nx;
+      const sparkCount = Math.round(18 + 36 * strength);
+      for (let i = 0; i < sparkCount; i++) {
+        const away = 1.4 + Math.random() * (3 + 4 * strength);
+        const slide = (Math.random() - 0.5) * (3 + 5 * strength);
+        const off = (Math.random() - 0.5) * 1.3;
+        spawn(
+          sparks,
+          cx + tx * off,
+          cz + tz * off,
+          -nx * away + tx * slide,
+          -nz * away + tz * slide,
+          0.25 + Math.random() * 0.4,
+          0.07 + Math.random() * 0.1,
+        );
+      }
+      const dustCount = Math.round(5 + 8 * strength);
+      for (let i = 0; i < dustCount; i++) {
+        const away = 0.5 + Math.random() * 1.2;
+        const slide = (Math.random() - 0.5) * 1.6;
+        spawn(dust, cx, cz, -nx * away + tx * slide, -nz * away + tz * slide, 0.7 + Math.random() * 0.5, 0.5 + Math.random() * 0.4);
+      }
+    },
+    // Grinding along a barrier: sparks trailing back from the contact point, against the direction of travel.
+    scrape(nx: number, nz: number, travelX: number, travelZ: number, count: number) {
+      const tx = -nz;
+      const tz = nx;
+      for (let i = 0; i < count; i++) {
+        const off = (Math.random() - 0.5) * 1.6;
+        const back = 1.5 + Math.random() * 2.5;
+        spawn(
+          sparks,
+          nx * REACH + tx * off,
+          nz * REACH + tz * off,
+          -travelX * back - nx * Math.random() * 1.2,
+          -travelZ * back - nz * Math.random() * 1.2,
+          0.18 + Math.random() * 0.25,
+          0.05 + Math.random() * 0.06,
+        );
+      }
+    },
+    update(dt: number) {
+      sparks.list.forEach((p) => {
+        if (p.life <= 0) return;
+        p.life -= dt;
+        if (p.life <= 0) {
+          p.sprite.visible = false;
+          p.sprite.material.opacity = 0;
+          return;
+        }
+        const age = 1 - p.life / p.maxLife;
+        p.sprite.position.addScaledVector(p.vel, dt);
+        p.vel.multiplyScalar(Math.max(0, 1 - dt * 2.2));
+        // Bright yellow-orange at first, cooling to red as it fades.
+        p.sprite.material.color.setHSL(0.11 - 0.09 * age, 1, 0.58);
+        p.sprite.material.opacity = Math.pow(1 - age, 1.2);
+        const sz = p.size * (1.15 - 0.55 * age);
+        p.sprite.scale.set(sz, sz, 1);
+      });
+      dust.list.forEach((p) => {
+        if (p.life <= 0) return;
+        p.life -= dt;
+        if (p.life <= 0) {
+          p.sprite.visible = false;
+          p.sprite.material.opacity = 0;
+          return;
+        }
+        const age = 1 - p.life / p.maxLife;
+        p.sprite.position.addScaledVector(p.vel, dt);
+        p.vel.multiplyScalar(Math.max(0, 1 - dt * 2.5));
+        p.sprite.material.opacity = 0.4 * Math.min(age / 0.1, 1) * (1 - age);
+        const sz = p.size * (1 + age * 2.2);
+        p.sprite.scale.set(sz, sz, 1);
+      });
+    },
+  };
 }
 
 function makeSmokeTexture(THREE: any) {
