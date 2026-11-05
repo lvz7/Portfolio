@@ -10,7 +10,7 @@
 // overlapping grains of audio are played from that spot, so the pitch and tone climb and fall
 // as the revs do. In neutral the revs follow the gas pedal. While driving they follow the
 // speed and gear. Brake squeal, tire noise, shift clicks and exhaust pops all read the same
-// physics (speed, braking, steering), so everything lines up.
+// physics (speed, braking, steering, hitting a barrier), so everything lines up.
 
 const SOUND_URLS = {
   idle: "/sounds/m2-idle.wav",
@@ -52,6 +52,7 @@ export type CarAudioInput = {
   speed: number; // signed ground speed in px/s, negative is reverse
   topSpeed: number; // top speed of the current gear, px/s
   slide: boolean; // steering hard at speed
+  scrape: number; // 0 to 1, how hard the car is grinding along a barrier
 };
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -76,6 +77,7 @@ export class CarAudio {
   private squealB: OscillatorNode;
   private skidGain: GainNode;
   private skidFilter: BiquadFilterNode;
+  private scrapeGain: GainNode;
   private fallbackOsc: OscillatorNode;
   private fallbackGain: GainNode;
 
@@ -130,6 +132,7 @@ export class CarAudio {
     this.rumbleGain = layer();
     this.squealGain = layer();
     this.skidGain = layer();
+    this.scrapeGain = layer();
     this.fallbackGain = layer();
 
     // White noise, shared by the tire, brake and pop sounds.
@@ -168,6 +171,7 @@ export class CarAudio {
     this.squealB.start();
     loopNoise("bandpass", 3000, 2.5, this.squealGain); // a little hiss under the squeal
     this.skidFilter = loopNoise("bandpass", 1800, 5, this.skidGain); // tire slide
+    loopNoise("bandpass", 1500, 1.3, this.scrapeGain); // metal scraping a barrier
 
     // A plain synth engine that only plays if the recordings can't be loaded.
     this.fallbackOsc = ctx.createOscillator();
@@ -257,6 +261,77 @@ export class CarAudio {
     this.burst({ type: "lowpass", freq: 900, peak: 0.35, attack: 0.005, decay: 0.12 });
     this.shiftDip = 0.09;
     if (up && this.rpm > 0.5) this.queuePops(1 + Math.floor(Math.random() * 2), 0.22);
+  }
+
+  // One tone with a fast fade, used for the ring of metal in a crash.
+  private tone(freq: number, peak: number, decay: number, delay = 0, type: OscillatorType = "sine") {
+    const { ctx } = this;
+    const t = ctx.currentTime + delay;
+    const osc = ctx.createOscillator();
+    osc.type = type;
+    osc.frequency.value = freq;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(peak, t + 0.004);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+    osc.connect(env);
+    env.connect(this.master);
+    osc.start(t);
+    osc.stop(t + decay + 0.05);
+  }
+
+  // A crash into a barrier. Strength runs from 0 (a bump) to 1 (flat out). It is built from a deep
+  // thud, a crunch of noise, a ring of metal and scattered debris, and it knocks the engine down.
+  crash(strength: number) {
+    const { ctx } = this;
+    const s = clamp(strength, 0.12, 1);
+    const t = ctx.currentTime;
+
+    // The thud: a sine that drops fast in pitch.
+    const thud = ctx.createOscillator();
+    thud.type = "sine";
+    thud.frequency.setValueAtTime(135, t);
+    thud.frequency.exponentialRampToValueAtTime(34, t + 0.34);
+    const thudEnv = ctx.createGain();
+    thudEnv.gain.setValueAtTime(0.0001, t);
+    thudEnv.gain.exponentialRampToValueAtTime(0.75 * s, t + 0.006);
+    thudEnv.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+    thud.connect(thudEnv);
+    thudEnv.connect(this.master);
+    thud.start(t);
+    thud.stop(t + 0.46);
+
+    // The crunch: a body of noise that darkens as it dies away.
+    this.burst({ type: "lowpass", freq: 1200 + 900 * s, q: 0.7, peak: 0.7 * s, attack: 0.004, decay: 0.3 + 0.3 * s });
+    // The snap of the first contact.
+    this.burst({ type: "highpass", freq: 2200, q: 0.8, peak: 0.4 * s, attack: 0.002, decay: 0.09 });
+
+    // The ring of bent metal: a few inharmonic tones that fade at different speeds.
+    const detune = 0.92 + Math.random() * 0.16;
+    [412, 655, 1043, 1530].forEach((f, i) => {
+      this.tone(f * detune, 0.1 * s, 0.28 + 0.12 * (3 - i) * s, i * 0.004, i % 2 ? "triangle" : "sine");
+    });
+
+    // Debris and glass: small bright ticks scattered over the next half second.
+    const ticks = 3 + Math.floor(s * 6);
+    for (let i = 0; i < ticks; i++) {
+      this.burst({
+        type: "highpass",
+        freq: 2500 + Math.random() * 2500,
+        q: 0.9,
+        peak: (0.07 + Math.random() * 0.12) * s,
+        attack: 0.002,
+        decay: 0.03 + Math.random() * 0.04,
+        delay: 0.05 + Math.random() * 0.55,
+      });
+    }
+
+    // The engine gets knocked down and chokes for a moment. The pull-off clip is cut so it can't
+    // keep playing through the impact.
+    this.rpm *= 0.5;
+    this.shiftDip = 0.18 + 0.25 * s;
+    this.stopPullOff(0.08);
+    this.prevThrottle = false;
   }
 
   private queuePops(count: number, over: number) {
@@ -442,6 +517,9 @@ export class CarAudio {
     if (braking && !this.prevBrake && speed > 150) {
       this.burst({ type: "lowpass", freq: 320, peak: 0.28 * (0.4 + speedN), attack: 0.01, decay: 0.12 });
     }
+
+    // Grinding along a barrier scrapes.
+    this.ramp(this.scrapeGain.gain, input.scrape * 0.2, 0.04);
 
     // Steering hard at speed slides the tires.
     this.ramp(this.skidGain.gain, input.slide ? 0.15 : 0, 0.08);
