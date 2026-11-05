@@ -54,7 +54,7 @@ export default function PortfolioPage() {
         </div>
         <div className="container pb-6">
           <p className="text-xs text-muted-foreground/70">
-            Car model: BMW M2 g87 [Free] by Black Snow (BlackSnow02), CC BY 4.0, via Sketchfab. Press D for doors, Space for engine, W to accelerate, S to brake, Q and E to shift.
+            Car model: BMW M2 g87 [Free] by Black Snow (BlackSnow02), CC BY 4.0, via Sketchfab. Press G or hit Drive to take it out. W and S for gas and brake, A and D to steer, Q and E to shift, F for doors, Space for engine, Esc to park.
           </p>
         </div>
       </footer>

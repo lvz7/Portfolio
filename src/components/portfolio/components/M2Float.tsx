@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
+import { Car, ParkingSquare } from "lucide-react";
 
 // A BMW M2 G87 on the right edge of the screen.
 // Scroll: the car moves down the right side and turns.
@@ -7,6 +8,11 @@ import { useReducedMotion } from "framer-motion";
 // Space: turns the engine on and off. W: accelerate (revs and tire squeal). S: brake.
 // Q: shift down. E: shift up (six gears).
 // Wheels spin and the rear tires smoke, like a burnout.
+//
+// Drive mode (G, or the Drive button): the car leaves the right edge and you drive it
+// around the whole page. W/Up gas, S/Down brake and reverse, A/Left and D/Right steer,
+// Q/E change gear (each gear raises the top speed), F opens the doors, Esc parks it.
+// The page scrolls to follow the car, and the car can't leave the page.
 
 const MODEL_SRC = "/models/bmw-m2-g87.glb";
 const THREE_SRC = "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js";
@@ -21,6 +27,25 @@ const DOOR_OPEN_ANGLE = (Math.PI * 54) / 180;
 const WHEEL_SPEED = 26; // radians per second
 const SMOKE_RATE = 60; // particles per second
 const ENGINE_SRC = "/sounds/bmw-xm-engine.mp3";
+
+// Drive mode tuning. Speeds are in screen pixels per second.
+const DRIVE_SCALE = 0.6; // The render box shrinks to this size while driving.
+const GEAR_TOP_SPEED = [0, 300, 450, 620, 800, 980, 1150]; // Top speed per gear (index 1 to 6).
+const ACCEL = 520; // Gas, px/s squared.
+const BRAKE = 1100; // Braking, px/s squared.
+const COAST = 260; // Slowdown when no key is held.
+const MAX_REVERSE = 220;
+const MAX_TURN = 2.3; // Radians per second at low speed.
+const EDGE_MARGIN = 115; // How close the car centre can get to the page edge (about half the car's length).
+const PX_PER_UNIT = 44; // Roughly how many screen pixels one model unit covers while driving.
+const WHEEL_RADIUS = 0.35; // Model units.
+const KMH_PER_PX = 0.22; // Only used for the speed readout.
+
+// Takes the short way round when blending two angles.
+function lerpAngle(a: number, b: number, t: number) {
+  const d = ((((b - a + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI;
+  return a + d * t;
+}
 
 // Loads Three.js and the GLTF loader as plain scripts, once per page.
 let libraryPromise: Promise<void> | null = null;
@@ -189,11 +214,23 @@ function playBrakeSqueal(sound: CarSound) {
 export default function M2Float() {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
+  const hudRef = useRef<HTMLSpanElement | null>(null);
+  const driveApi = useRef<{ toggle: () => void } | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [driving, setDriving] = useState(false);
   const reduceMotion = useReducedMotion();
 
   // The key handler and animation loop read this state.
-  const controls = useRef({ doorsOpen: false, engineOn: false, throttle: false, brake: false, gear: 1 });
+  const controls = useRef({
+    doorsOpen: false,
+    engineOn: false,
+    throttle: false,
+    brake: false,
+    gear: 1,
+    driving: false,
+    left: false,
+    right: false,
+  });
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -221,8 +258,16 @@ export default function M2Float() {
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(28, CAR_WIDTH / CAR_HEIGHT, 0.1, 100);
-        camera.position.set(3.4, 1.5, 6.2);
-        camera.lookAt(0, 0.35, 0);
+        // Docked view is a 3/4 angle. Drive view looks down from above and sits far enough back
+        // that the car never gets cropped, whichever way it points.
+        const dockCamPos = new THREE.Vector3(3.4, 1.5, 6.2);
+        const dockLook = new THREE.Vector3(0, 0.35, 0);
+        const driveCamPos = new THREE.Vector3(0, 10.6, 3.0);
+        const driveLook = new THREE.Vector3(0, 0, 0);
+        const camPos = new THREE.Vector3();
+        const camLook = new THREE.Vector3();
+        camera.position.copy(dockCamPos);
+        camera.lookAt(dockLook);
 
         // Night lighting: a dim blue moon, a faint fill, and low ambient light.
         scene.add(new THREE.AmbientLight(0x3a4a66, 0.5));
@@ -257,6 +302,61 @@ export default function M2Float() {
             const doorPivots = setupDoors(THREE, model, carRoot);
             const smoke = setupSmoke(THREE, carRoot, smokeTexture);
 
+            // A soft shadow on the "ground" under the car, so it reads as driving over the page.
+            const carSize = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
+            const shadowMat = new THREE.MeshBasicMaterial({
+              map: smokeTexture,
+              color: 0x000000,
+              transparent: true,
+              opacity: 0,
+              depthWrite: false,
+            });
+            const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), shadowMat);
+            shadow.rotation.x = -Math.PI / 2;
+            shadow.scale.set(carSize.x * 1.25, carSize.z * 1.15, 1);
+            shadow.position.y = -carSize.y / 2 + 0.01;
+            carRoot.add(shadow);
+
+            // Drive state. The car's position is kept in page coordinates, so the page can scroll under it.
+            // Heading 0 points down the screen. Heading PI points up, and -PI/2 points left.
+            const drive = {
+              blend: 0, // 0 = docked on the right edge, 1 = fully in drive mode
+              wx: 0,
+              wy: 0,
+              heading: -Math.PI / 2,
+              speed: 0, // signed, px/s. Negative is reverse.
+              hudTimer: 0,
+              lastCx: 0,
+              lastCy: 0,
+            };
+
+            const ensureSound = () => {
+              if (!sound) sound = createCarSound();
+              if (sound.ctx.state === "suspended") sound.ctx.resume();
+              return sound;
+            };
+
+            const setDrive = (on: boolean) => {
+              if (controls.current.driving === on) return;
+              controls.current.driving = on;
+              setDriving(on);
+              controls.current.left = false;
+              controls.current.right = false;
+              controls.current.throttle = false;
+              controls.current.brake = false;
+              if (on) {
+                ensureSound();
+                controls.current.engineOn = true;
+                if (controls.current.gear < 3) controls.current.gear = 3;
+                // Start from wherever the car is on screen right now.
+                drive.wx = drive.lastCx;
+                drive.wy = drive.lastCy + window.scrollY;
+                drive.heading = -Math.PI / 2;
+                drive.speed = 0;
+              }
+            };
+            driveApi.current = { toggle: () => setDrive(!controls.current.driving) };
+
             setLoaded(true);
 
             const animate = (now: number) => {
@@ -264,16 +364,115 @@ export default function M2Float() {
               const dt = Math.min((now - lastTime) / 1000, 0.05);
               lastTime = now;
 
-              // Scroll turns the car one full rotation over the page.
+              const isDriving = controls.current.driving;
+              drive.blend += ((isDriving ? 1 : 0) - drive.blend) * Math.min(1, dt * 5);
+              if (Math.abs((isDriving ? 1 : 0) - drive.blend) < 0.002) drive.blend = isDriving ? 1 : 0;
+              const b = drive.blend;
+
+              // Docked pose. Scroll turns the car one full rotation over the page and slides it down the right edge.
               const max = document.documentElement.scrollHeight - window.innerHeight;
               const p = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
-              carRoot.rotation.y = p * Math.PI * 2;
-
-              // Moves the car down the right edge.
-              const x = Math.max(window.innerWidth - RIGHT_OFFSET, 0);
+              const dockRot = p * Math.PI * 2;
+              const dockX = Math.max(window.innerWidth - RIGHT_OFFSET, 0);
               const freeHeight = Math.max(window.innerHeight - CAR_HEIGHT - TOP_OFFSET - BOTTOM_OFFSET, 0);
-              const y = TOP_OFFSET + freeHeight * p;
-              wrap.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+              const dockY = TOP_OFFSET + freeHeight * p;
+              const dockCx = dockX + CAR_WIDTH / 2;
+              const dockCy = dockY + CAR_HEIGHT / 2;
+
+              // Driving physics.
+              let driveSpin = 0;
+              let slideSmoke = false;
+              if (isDriving) {
+                const { throttle: throttleKey, brake, gear, left, right, engineOn } = controls.current;
+                // With the engine off (Space), the gas pedal does nothing.
+                const throttle = throttleKey && engineOn;
+                const top = GEAR_TOP_SPEED[gear] ?? GEAR_TOP_SPEED[3];
+                let v = drive.speed;
+
+                if (throttle && !brake) {
+                  // Gas. Pushing against reverse brakes first.
+                  v += (v < 0 ? BRAKE : ACCEL * (1 - Math.max(v, 0) / (top * 1.05))) * dt;
+                } else if (brake && !throttle) {
+                  // Brake while moving forward, then reverse.
+                  v -= (v > 0 ? BRAKE : ACCEL * 0.7) * dt;
+                } else if (!throttle && !brake) {
+                  const drag = COAST * dt;
+                  v = Math.abs(v) <= drag ? 0 : v - Math.sign(v) * drag;
+                }
+                // A lower gear also caps the speed, so shifting down slows the car.
+                v = Math.min(v, top);
+                v = Math.max(v, -MAX_REVERSE);
+
+                // Steering works with speed, and flips when reversing.
+                const steerInput = (left ? 1 : 0) - (right ? 1 : 0);
+                const grip = Math.min(Math.abs(v) / 180, 1);
+                const turnRate = MAX_TURN / (1 + Math.abs(v) / 900);
+                drive.heading += steerInput * turnRate * grip * Math.sign(v) * dt;
+                slideSmoke = steerInput !== 0 && Math.abs(v) > 420;
+
+                // Forward on screen is (sin h, cos h) with y pointing down.
+                drive.wx += Math.sin(drive.heading) * v * dt;
+                drive.wy += Math.cos(drive.heading) * v * dt;
+
+                // Walls: the car stays on the page and loses speed when it hits an edge.
+                const docH = document.documentElement.scrollHeight;
+                const minX = EDGE_MARGIN;
+                const maxX = Math.max(window.innerWidth - EDGE_MARGIN, minX);
+                const minY = EDGE_MARGIN;
+                const maxY = Math.max(docH - EDGE_MARGIN, minY);
+                // How head-on the hit is decides how much speed is lost, so a car scraping along an
+                // edge keeps most of its speed and one driving straight into it stops quickly.
+                let headOn = 0;
+                if (drive.wx < minX) { drive.wx = minX; headOn = Math.max(headOn, Math.abs(Math.sin(drive.heading))); }
+                if (drive.wx > maxX) { drive.wx = maxX; headOn = Math.max(headOn, Math.abs(Math.sin(drive.heading))); }
+                if (drive.wy < minY) { drive.wy = minY; headOn = Math.max(headOn, Math.abs(Math.cos(drive.heading))); }
+                if (drive.wy > maxY) { drive.wy = maxY; headOn = Math.max(headOn, Math.abs(Math.cos(drive.heading))); }
+                if (headOn > 0) v *= 1 - Math.min(1, headOn * 4.5 * dt);
+                drive.speed = v;
+
+                // The page scrolls to keep the car in the middle band of the screen.
+                const screenY = drive.wy - window.scrollY;
+                const bandTop = window.innerHeight * 0.35;
+                const bandBottom = window.innerHeight * 0.65;
+                let scrollDelta = 0;
+                if (screenY < bandTop) scrollDelta = screenY - bandTop;
+                else if (screenY > bandBottom) scrollDelta = screenY - bandBottom;
+                if (scrollDelta !== 0) {
+                  window.scrollTo({ top: window.scrollY + scrollDelta * Math.min(1, dt * 8), behavior: "instant" });
+                }
+
+                // Wheels follow the ground speed (radians per second).
+                driveSpin = v / (PX_PER_UNIT * WHEEL_RADIUS);
+              } else {
+                // Rolls to a stop if the car is parked mid-move.
+                drive.speed = 0;
+              }
+
+              // Blend between the docked pose and the driving pose.
+              const driveCx = drive.wx;
+              const driveCy = drive.wy - window.scrollY;
+              const cx = dockCx + (driveCx - dockCx) * b;
+              const cy = dockCy + (driveCy - dockCy) * b;
+              drive.lastCx = cx;
+              drive.lastCy = cy;
+              const scale = 1 + (DRIVE_SCALE - 1) * b;
+              wrap.style.transform = `translate3d(${cx - CAR_WIDTH / 2}px, ${cy - CAR_HEIGHT / 2}px, 0) scale(${scale})`;
+              carRoot.rotation.y = lerpAngle(dockRot, drive.heading, b);
+              shadowMat.opacity = 0.5 * b;
+
+              camPos.lerpVectors(dockCamPos, driveCamPos, b);
+              camLook.lerpVectors(dockLook, driveLook, b);
+              camera.position.copy(camPos);
+              camera.lookAt(camLook);
+
+              if (b > 0.01 && hudRef.current) {
+                drive.hudTimer -= dt;
+                if (drive.hudTimer <= 0) {
+                  drive.hudTimer = 0.1;
+                  const kmh = Math.round(Math.abs(drive.speed) * KMH_PER_PX);
+                  hudRef.current.textContent = `${kmh} km/h  ·  gear ${controls.current.gear}`;
+                }
+              }
 
               // Doors ease open and closed.
               const doorTarget = controls.current.doorsOpen ? 1 : 0;
@@ -283,12 +482,17 @@ export default function M2Float() {
               });
 
               // Wheels spin, and the rear tires smoke.
-              if (!reduceMotion) {
-                wheelPivots.forEach((w: any) => {
-                  w.rotation.x += WHEEL_SPEED * dt;
-                });
-                smoke.update(dt, wheelPivots.filter((w: any) => w.rear));
-              }
+              // Docked, the car does a constant burnout. Driving, the wheels follow the ground speed,
+              // and the rear tires only smoke when pulling away from a stop or sliding through a fast corner.
+              const dockedSpin = reduceMotion ? 0 : WHEEL_SPEED;
+              const spin = dockedSpin * (1 - b) + driveSpin * b;
+              wheelPivots.forEach((w: any) => {
+                w.rotation.x += spin * dt;
+              });
+              const { throttle: gassing, engineOn: engineRunning } = controls.current;
+              const launchSmoke = isDriving && gassing && engineRunning && Math.abs(drive.speed) < 160;
+              const smokeOn = isDriving ? !reduceMotion && (launchSmoke || slideSmoke) : !reduceMotion && b < 0.5;
+              smoke.update(dt, smokeOn ? wheelPivots.filter((w: any) => w.rear) : []);
 
               // Engine sound: E turns it on. W revs it and adds tire squeal. S lowers the pitch.
               if (sound) {
@@ -297,11 +501,17 @@ export default function M2Float() {
                 // A slow swell in idle pitch, so the idle sounds alive instead of flat.
                 const idle = 48 + 6 * Math.abs(Math.sin(now * 0.0016));
                 // Higher gears sit at a higher pitch under throttle.
-                const pitch = throttle ? 70 + gear * 12 : brake ? 40 : idle;
+                // While driving, revs follow how close the car is to the top speed of the current gear.
+                const rev = isDriving ? Math.min(Math.abs(drive.speed) / (GEAR_TOP_SPEED[gear] || 600), 1) : 0;
+                const pitch = isDriving
+                  ? idle + rev * 85 + (throttle ? 12 : 0)
+                  : throttle ? 70 + gear * 12 : brake ? 40 : idle;
                 sound.engineOsc.frequency.setTargetAtTime(pitch, t, throttle ? 0.12 : 0.25);
                 if (sound.sample) {
                   // The recording plays faster under throttle and higher gears, and slower when braking.
-                  const rate = throttle ? 0.85 + gear * 0.1 : brake ? 0.55 : 0.75;
+                  const rate = isDriving
+                    ? 0.7 + rev * 0.85 + (throttle ? 0.08 : 0)
+                    : throttle ? 0.85 + gear * 0.1 : brake ? 0.55 : 0.75;
                   sound.sample.playbackRate.setTargetAtTime(rate, t, throttle ? 0.15 : 0.3);
                   const vol = engineOn ? (throttle ? 0.9 : brake ? 0.4 : 0.6) : 0;
                   sound.sampleGain.gain.setTargetAtTime(vol, t, 0.12);
@@ -317,53 +527,78 @@ export default function M2Float() {
             };
             frame = requestAnimationFrame(animate);
 
-            // Keys: D for doors, E for engine sound.
+            // Keys. Docked: D doors, Space engine, W gas, S brake, Q/E gears, G to start driving.
+            // Driving: W/S or Up/Down for gas and brake, A/D or Left/Right to steer, F doors, Esc to park.
             const onKey = (e: KeyboardEvent) => {
               if (e.ctrlKey || e.metaKey || e.altKey) return;
               const target = e.target as HTMLElement | null;
               if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
               const key = e.key.toLowerCase();
+              const isDriving = controls.current.driving;
 
-              if (key === "d") {
+              if (key === "g") {
+                if (!e.repeat) setDrive(!isDriving);
+                return;
+              }
+              if (key === "escape") {
+                if (isDriving) setDrive(false);
+                return;
+              }
+
+              // The arrow keys and space would scroll the page, so they are taken over while driving.
+              if (isDriving && (key.startsWith("arrow") || key === " ")) e.preventDefault();
+
+              const doorKey = isDriving ? key === "f" : key === "d" || key === "f";
+              if (doorKey) {
+                if (e.repeat) return;
                 controls.current.doorsOpen = !controls.current.doorsOpen;
-                if (!sound) sound = createCarSound();
-                if (sound.ctx.state === "suspended") sound.ctx.resume();
-                playDoorThunk(sound);
+                playDoorThunk(ensureSound());
+                return;
               }
               if (key === " ") {
                 e.preventDefault();
                 controls.current.engineOn = !controls.current.engineOn;
-                if (!sound) sound = createCarSound();
-                if (sound.ctx.state === "suspended") sound.ctx.resume();
+                ensureSound();
+                return;
               }
               if (key === "q" || key === "e") {
                 // Q shifts down, E shifts up, within gears 1 to 6.
                 const next = controls.current.gear + (key === "e" ? 1 : -1);
                 if (next >= 1 && next <= 6) {
                   controls.current.gear = next;
-                  if (!sound) sound = createCarSound();
-                  if (sound.ctx.state === "suspended") sound.ctx.resume();
-                  playShiftBlip(sound);
+                  playShiftBlip(ensureSound());
                 }
+                return;
               }
-              if (key === "w" || key === "s") {
-                if (!sound) sound = createCarSound();
-                if (sound.ctx.state === "suspended") sound.ctx.resume();
-                if (key === "w") controls.current.throttle = true;
-                if (key === "s") {
-                  controls.current.brake = true;
-                  if (!e.repeat) playBrakeSqueal(sound);
-                }
+              if (key === "w" || key === "arrowup") {
+                ensureSound();
+                controls.current.throttle = true;
+                return;
+              }
+              if (key === "s" || key === "arrowdown") {
+                const snd = ensureSound();
+                controls.current.brake = true;
+                // A short squeal on braking. While driving it only plays when the car is actually moving.
+                if (!e.repeat && (!isDriving || Math.abs(drive.speed) > 200)) playBrakeSqueal(snd);
+                return;
+              }
+              if (isDriving) {
+                if (key === "a" || key === "arrowleft") controls.current.left = true;
+                if (key === "d" || key === "arrowright") controls.current.right = true;
               }
             };
             const onKeyUp = (e: KeyboardEvent) => {
               const key = e.key.toLowerCase();
-              if (key === "w") controls.current.throttle = false;
-              if (key === "s") controls.current.brake = false;
+              if (key === "w" || key === "arrowup") controls.current.throttle = false;
+              if (key === "s" || key === "arrowdown") controls.current.brake = false;
+              if (key === "a" || key === "arrowleft") controls.current.left = false;
+              if (key === "d" || key === "arrowright") controls.current.right = false;
             };
             const onBlur = () => {
               controls.current.throttle = false;
               controls.current.brake = false;
+              controls.current.left = false;
+              controls.current.right = false;
             };
             window.addEventListener("keydown", onKey);
             window.addEventListener("keyup", onKeyUp);
@@ -384,6 +619,7 @@ export default function M2Float() {
 
     return () => {
       disposed = true;
+      driveApi.current = null;
       cancelAnimationFrame(frame);
       cleanups.forEach((c) => c());
       if (sound) {
@@ -402,19 +638,46 @@ export default function M2Float() {
   }, []);
 
   return (
-    <div
-      ref={wrapRef}
-      aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-30 hidden lg:block"
-      style={{
-        width: CAR_WIDTH,
-        height: CAR_HEIGHT,
-        opacity: loaded ? 1 : 0,
-        transition: "opacity 0.6s ease",
-      }}
-    >
-      <div ref={mountRef} style={{ width: CAR_WIDTH, height: CAR_HEIGHT }} />
-    </div>
+    <>
+      <div
+        ref={wrapRef}
+        aria-hidden="true"
+        className="pointer-events-none fixed left-0 top-0 z-30 hidden lg:block"
+        style={{
+          width: CAR_WIDTH,
+          height: CAR_HEIGHT,
+          opacity: loaded ? 1 : 0,
+          transition: "opacity 0.6s ease",
+        }}
+      >
+        <div ref={mountRef} style={{ width: CAR_WIDTH, height: CAR_HEIGHT }} />
+      </div>
+
+      {loaded && (
+        <div className="fixed bottom-4 left-4 z-40 hidden items-center gap-3 lg:flex">
+          <button
+            type="button"
+            onClick={() => driveApi.current?.toggle()}
+            aria-pressed={driving}
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-2 text-sm font-medium text-foreground shadow-elevated backdrop-blur-md transition-colors hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {driving ? <ParkingSquare className="h-4 w-4" /> : <Car className="h-4 w-4" />}
+            {driving ? "Park" : "Drive the M2"}
+            <kbd className="rounded border border-border/70 bg-background/60 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              {driving ? "Esc" : "G"}
+            </kbd>
+          </button>
+          {driving && (
+            <div className="rounded-full border border-border/70 bg-card/70 px-4 py-2 text-xs text-muted-foreground shadow-elevated backdrop-blur-md">
+              <span ref={hudRef} className="font-medium tabular-nums text-foreground">
+                0 km/h
+              </span>
+              <span className="ml-3 hidden xl:inline">W/S gas and brake · A/D steer · Q/E gears · F doors · Space engine</span>
+            </div>
+          )}
+        </div>
+      )}
+    </>
   );
 }
 
