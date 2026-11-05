@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { Car, ParkingSquare } from "lucide-react";
+import { CarAudio, prefetchCarSounds } from "./carAudio";
 
 // A BMW M2 G87 on the right edge of the screen.
 // Scroll: the car moves down the right side and turns.
 // D: opens and closes the doors, with a door sound.
-// Space: turns the engine on and off. W: accelerate (revs and tire squeal). S: brake.
-// Q: shift down. E: shift up (six gears).
+// Space: turns the engine on and off. W: rev the engine in neutral (it starts the engine if it is off). S: brake.
+// Q: shift down. E: shift up (six gears). Sound lives in carAudio.ts.
 // Wheels spin and the rear tires smoke, like a burnout.
 //
 // Drive mode (G, or the Drive button): the car leaves the right edge and you drive it
@@ -26,7 +27,6 @@ const BOTTOM_OFFSET = 24;
 const DOOR_OPEN_ANGLE = (Math.PI * 54) / 180;
 const WHEEL_SPEED = 26; // radians per second
 const SMOKE_RATE = 60; // particles per second
-const ENGINE_SRC = "/sounds/bmw-xm-engine.mp3";
 
 // Drive mode tuning. Speeds are in screen pixels per second.
 const DRIVE_SCALE = 0.6; // The render box shrinks to this size while driving.
@@ -71,146 +71,6 @@ function loadLibrary() {
   return libraryPromise;
 }
 
-// Sounds are synthesized in the browser with the Web Audio API, so no audio files are needed.
-// The audio context is created on the first key press, since browsers block sound until a user gesture.
-type CarSound = {
-  ctx: AudioContext;
-  master: GainNode;
-  engineOsc: OscillatorNode;
-  engineGain: GainNode;
-  squealGain: GainNode;
-  noiseBuffer: AudioBuffer;
-  sampleGain: GainNode;
-  sample: AudioBufferSourceNode | null;
-};
-
-// Loads the engine recording and starts it looping. Until it loads, the synth engine is used.
-function loadEngineSample(sound: CarSound) {
-  fetch(ENGINE_SRC)
-    .then((r) => r.arrayBuffer())
-    .then((data) => sound.ctx.decodeAudioData(data))
-    .then((buffer) => {
-      const src = sound.ctx.createBufferSource();
-      src.buffer = buffer;
-      src.loop = true;
-      src.connect(sound.sampleGain);
-      src.start();
-      sound.sample = src;
-    })
-    .catch(() => {
-      // If the file can't load, the synth engine keeps playing.
-    });
-}
-
-function createCarSound(): CarSound {
-  const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-  const ctx: AudioContext = new AudioCtx();
-  const master = ctx.createGain();
-  master.gain.value = 0.7;
-  master.connect(ctx.destination);
-
-  // Engine: a low sawtooth through a low-pass filter. Its pitch rises and falls to mimic a rev.
-  const engineOsc = ctx.createOscillator();
-  engineOsc.type = "sawtooth";
-  engineOsc.frequency.value = 48;
-  const engineFilter = ctx.createBiquadFilter();
-  engineFilter.type = "lowpass";
-  engineFilter.frequency.value = 700;
-  engineFilter.Q.value = 2;
-  const engineGain = ctx.createGain();
-  engineGain.gain.value = 0;
-  engineOsc.connect(engineFilter);
-  engineFilter.connect(engineGain);
-  engineGain.connect(master);
-  engineOsc.start();
-
-  // Tire squeal: band-passed white noise, looping, used during the burnout.
-  const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
-  const data = noiseBuffer.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-  const noise = ctx.createBufferSource();
-  noise.buffer = noiseBuffer;
-  noise.loop = true;
-  const squealFilter = ctx.createBiquadFilter();
-  squealFilter.type = "bandpass";
-  squealFilter.frequency.value = 2100;
-  squealFilter.Q.value = 7;
-  const squealGain = ctx.createGain();
-  squealGain.gain.value = 0;
-  noise.connect(squealFilter);
-  squealFilter.connect(squealGain);
-  squealGain.connect(master);
-  noise.start();
-
-  const sampleGain = ctx.createGain();
-  sampleGain.gain.value = 0;
-  sampleGain.connect(master);
-  const result: CarSound = { ctx, master, engineOsc, engineGain, squealGain, noiseBuffer, sampleGain, sample: null };
-  loadEngineSample(result);
-  return result;
-}
-
-// A short low thud for when a door opens or closes.
-function playDoorThunk(sound: CarSound) {
-  const { ctx, master, noiseBuffer } = sound;
-  const src = ctx.createBufferSource();
-  src.buffer = noiseBuffer;
-  const lp = ctx.createBiquadFilter();
-  lp.type = "lowpass";
-  lp.frequency.value = 260;
-  const env = ctx.createGain();
-  const now = ctx.currentTime;
-  env.gain.setValueAtTime(0.0001, now);
-  env.gain.exponentialRampToValueAtTime(0.9, now + 0.01);
-  env.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
-  src.connect(lp);
-  lp.connect(env);
-  env.connect(master);
-  src.start(now, Math.random());
-  src.stop(now + 0.3);
-}
-
-// A short click for a gear change.
-function playShiftBlip(sound: CarSound) {
-  const { ctx, master, noiseBuffer } = sound;
-  const src = ctx.createBufferSource();
-  src.buffer = noiseBuffer;
-  const lp = ctx.createBiquadFilter();
-  lp.type = "lowpass";
-  lp.frequency.value = 900;
-  const env = ctx.createGain();
-  const now = ctx.currentTime;
-  env.gain.setValueAtTime(0.0001, now);
-  env.gain.exponentialRampToValueAtTime(0.35, now + 0.005);
-  env.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
-  src.connect(lp);
-  lp.connect(env);
-  env.connect(master);
-  src.start(now, Math.random());
-  src.stop(now + 0.15);
-}
-
-// A short squeal for braking, played once when S is pressed.
-function playBrakeSqueal(sound: CarSound) {
-  const { ctx, master, noiseBuffer } = sound;
-  const src = ctx.createBufferSource();
-  src.buffer = noiseBuffer;
-  const bp = ctx.createBiquadFilter();
-  bp.type = "bandpass";
-  bp.frequency.value = 1500;
-  bp.Q.value = 5;
-  const env = ctx.createGain();
-  const now = ctx.currentTime;
-  env.gain.setValueAtTime(0.0001, now);
-  env.gain.exponentialRampToValueAtTime(0.25, now + 0.03);
-  env.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
-  src.connect(bp);
-  bp.connect(env);
-  env.connect(master);
-  src.start(now, Math.random());
-  src.stop(now + 0.55);
-}
-
 export default function M2Float() {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
@@ -241,8 +101,9 @@ export default function M2Float() {
     let frame = 0;
     let renderer: any = null;
     let lastTime = performance.now();
-    let sound: CarSound | null = null;
+    let sound: CarAudio | null = null;
     const cleanups: Array<() => void> = [];
+    void prefetchCarSounds();
 
     loadLibrary()
       .then(() => {
@@ -331,8 +192,8 @@ export default function M2Float() {
             };
 
             const ensureSound = () => {
-              if (!sound) sound = createCarSound();
-              if (sound.ctx.state === "suspended") sound.ctx.resume();
+              if (!sound) sound = new CarAudio();
+              sound.resume();
               return sound;
             };
 
@@ -470,7 +331,8 @@ export default function M2Float() {
                 if (drive.hudTimer <= 0) {
                   drive.hudTimer = 0.1;
                   const kmh = Math.round(Math.abs(drive.speed) * KMH_PER_PX);
-                  hudRef.current.textContent = `${kmh} km/h  ·  gear ${controls.current.gear}`;
+                  const rpm = Math.round((750 + (sound ? sound.rpm : 0) * 6450) / 50) * 50;
+                  hudRef.current.textContent = `${kmh} km/h  ·  gear ${controls.current.gear}  ·  ${rpm} rpm`;
                 }
               }
 
@@ -494,33 +356,19 @@ export default function M2Float() {
               const smokeOn = isDriving ? !reduceMotion && (launchSmoke || slideSmoke) : !reduceMotion && b < 0.5;
               smoke.update(dt, smokeOn ? wheelPivots.filter((w: any) => w.rear) : []);
 
-              // Engine sound: E turns it on. W revs it and adds tire squeal. S lowers the pitch.
+              // Engine and tire sound. In neutral the revs follow the pedal. While driving they follow the
+              // speed and gear, and the brake and tire sounds read the same speed and steering.
               if (sound) {
                 const { engineOn, throttle, brake, gear } = controls.current;
-                const t = sound.ctx.currentTime;
-                // A slow swell in idle pitch, so the idle sounds alive instead of flat.
-                const idle = 48 + 6 * Math.abs(Math.sin(now * 0.0016));
-                // Higher gears sit at a higher pitch under throttle.
-                // While driving, revs follow how close the car is to the top speed of the current gear.
-                const rev = isDriving ? Math.min(Math.abs(drive.speed) / (GEAR_TOP_SPEED[gear] || 600), 1) : 0;
-                const pitch = isDriving
-                  ? idle + rev * 85 + (throttle ? 12 : 0)
-                  : throttle ? 70 + gear * 12 : brake ? 40 : idle;
-                sound.engineOsc.frequency.setTargetAtTime(pitch, t, throttle ? 0.12 : 0.25);
-                if (sound.sample) {
-                  // The recording plays faster under throttle and higher gears, and slower when braking.
-                  const rate = isDriving
-                    ? 0.7 + rev * 0.85 + (throttle ? 0.08 : 0)
-                    : throttle ? 0.85 + gear * 0.1 : brake ? 0.55 : 0.75;
-                  sound.sample.playbackRate.setTargetAtTime(rate, t, throttle ? 0.15 : 0.3);
-                  const vol = engineOn ? (throttle ? 0.9 : brake ? 0.4 : 0.6) : 0;
-                  sound.sampleGain.gain.setTargetAtTime(vol, t, 0.12);
-                  sound.engineGain.gain.setTargetAtTime(0, t, 0.05);
-                } else {
-                  const level = engineOn ? (throttle ? 0.2 : brake ? 0.07 : 0.12) : 0;
-                  sound.engineGain.gain.setTargetAtTime(level, t, 0.12);
-                }
-                sound.squealGain.gain.setTargetAtTime(engineOn && throttle ? 0.04 : 0, t, 0.15);
+                sound.update(dt, {
+                  engineOn,
+                  throttle,
+                  brake,
+                  driving: isDriving,
+                  speed: isDriving ? drive.speed : 0,
+                  topSpeed: GEAR_TOP_SPEED[gear] ?? GEAR_TOP_SPEED[3],
+                  slide: slideSmoke,
+                });
               }
 
               renderer.render(scene, camera);
@@ -552,7 +400,7 @@ export default function M2Float() {
               if (doorKey) {
                 if (e.repeat) return;
                 controls.current.doorsOpen = !controls.current.doorsOpen;
-                playDoorThunk(ensureSound());
+                ensureSound().door();
                 return;
               }
               if (key === " ") {
@@ -565,21 +413,23 @@ export default function M2Float() {
                 // Q shifts down, E shifts up, within gears 1 to 6.
                 const next = controls.current.gear + (key === "e" ? 1 : -1);
                 if (next >= 1 && next <= 6) {
+                  const up = next > controls.current.gear;
                   controls.current.gear = next;
-                  playShiftBlip(ensureSound());
+                  ensureSound().shift(up);
                 }
                 return;
               }
               if (key === "w" || key === "arrowup") {
                 ensureSound();
+                // In neutral, W starts the engine if it is off, so there is always something to rev.
+                if (!isDriving && !controls.current.engineOn) controls.current.engineOn = true;
                 controls.current.throttle = true;
                 return;
               }
               if (key === "s" || key === "arrowdown") {
-                const snd = ensureSound();
+                // The brake sound comes from the physics (speed and braking), not from this key press.
+                ensureSound();
                 controls.current.brake = true;
-                // A short squeal on braking. While driving it only plays when the car is actually moving.
-                if (!e.repeat && (!isDriving || Math.abs(drive.speed) > 200)) playBrakeSqueal(snd);
                 return;
               }
               if (isDriving) {
@@ -623,7 +473,7 @@ export default function M2Float() {
       cancelAnimationFrame(frame);
       cleanups.forEach((c) => c());
       if (sound) {
-        sound.ctx.close();
+        sound.dispose();
         sound = null;
       }
       if (renderer) {
