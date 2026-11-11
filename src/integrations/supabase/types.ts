@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_login_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: string
+          login_kind: string
+          token_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address: string
+          login_kind: string
+          token_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string
+          login_kind?: string
+          token_hash?: string | null
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           contact: string

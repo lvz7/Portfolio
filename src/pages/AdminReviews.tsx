@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Lock, Check, X, Mail, MailOpen } from "lucide-react";
 
 type PendingReview = {
@@ -24,14 +24,20 @@ type ContactSubmission = {
 };
 
 const fnUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reviews-admin`;
-const ADMIN_PASSWORD = "Luziishere";
+type LoginRecord = {
+  id: string;
+  ip_address: string;
+  login_kind: "real" | "decoy" | "failed";
+  created_at: string;
+  expires_at: string;
+};
 
 async function postAdmin<T>(adminKey: string, body: unknown) {
   const res = await fetch(fnUrl, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-admin-key": adminKey,
+      "x-admin-session": adminKey,
     },
     body: JSON.stringify(body),
   });
@@ -47,25 +53,72 @@ export default function AdminReviews() {
   const { toast } = useToast();
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [adminKey, setAdminKey] = useState(ADMIN_PASSWORD);
+  const [adminKey, setAdminKey] = useState("");
+  const [mode, setMode] = useState<"real" | "decoy" | null>(null);
+  const [logins, setLogins] = useState<LoginRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [reviews, setReviews] = useState<PendingReview[]>([]);
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
 
-  const canUse = useMemo(() => adminKey.trim().length > 0, [adminKey]);
+  const canUse = isAuthenticated && !loading;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const data = await postAdmin<{ mode: "real" | "decoy"; token: string | null }>("", { action: "login", password });
+      setPassword("");
+      setMode(data.mode);
+      setAdminKey(data.token ?? "");
       setIsAuthenticated(true);
-      toast({ title: "Welcome!", description: "Access granted." });
-    } else {
-      toast({ title: "Invalid password", description: "Please try again.", variant: "destructive" });
+      if (data.mode === "real" && data.token) {
+        const [pending, submitted, history] = await Promise.all([
+          postAdmin<{ pending: PendingReview[] }>(data.token, { action: "list_pending" }),
+          postAdmin<{ contacts: ContactSubmission[] }>(data.token, { action: "list_contacts" }),
+          postAdmin<{ logins: LoginRecord[] }>(data.token, { action: "list_logins" }),
+        ]);
+        setReviews(pending.pending ?? []);
+        setContacts(submitted.contacts ?? []);
+        setLogins(history.logins ?? []);
+      }
+    } catch (e: unknown) {
+      toast({ title: "Couldn't sign in", description: e instanceof Error ? e.message : "Please try again.", variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const loadLogins = async () => {
+    if (!canUse) return;
+    if (mode === "decoy") return;
+    setLoading(true);
+    try {
+      const data = await postAdmin<{ logins: LoginRecord[] }>(adminKey, { action: "list_logins" });
+      setLogins(data.logins ?? []);
+    } catch (e: unknown) {
+      toast({ title: "Couldn't load logins", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally { setLoading(false); }
+  };
+
+  const logout = async () => {
+    try {
+      if (mode === "real") await postAdmin(adminKey, { action: "logout" });
+    } catch (e: unknown) {
+      toast({ title: "Couldn't sign out", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+      return;
+    }
+    setIsAuthenticated(false);
+    setAdminKey("");
+    setMode(null);
+    setReviews([]);
+    setContacts([]);
+    setLogins([]);
   };
 
   const loadPending = async () => {
     if (!canUse) return;
+    if (mode === "decoy") return;
     setLoading(true);
     try {
       const data = await postAdmin<{ pending: PendingReview[] }>(adminKey.trim(), { action: "list_pending" });
@@ -78,7 +131,7 @@ export default function AdminReviews() {
   };
 
   const loadContacts = async () => {
-    if (!canUse) return;
+    if (!canUse || mode !== "real") return;
     setLoading(true);
     try {
       const data = await postAdmin<{ contacts: ContactSubmission[] }>(adminKey.trim(), { action: "list_contacts" });
@@ -91,7 +144,7 @@ export default function AdminReviews() {
   };
 
   const approve = async (id: string) => {
-    if (!canUse) return;
+    if (!canUse || mode !== "real") return;
     setLoading(true);
     try {
       await postAdmin(adminKey.trim(), { action: "approve", id });
@@ -105,7 +158,7 @@ export default function AdminReviews() {
   };
 
   const reject = async (id: string) => {
-    if (!canUse) return;
+    if (!canUse || mode !== "real") return;
     setLoading(true);
     try {
       await postAdmin(adminKey.trim(), { action: "reject", id });
@@ -119,7 +172,7 @@ export default function AdminReviews() {
   };
 
   const markRead = async (id: string) => {
-    if (!canUse) return;
+    if (!canUse || mode !== "real") return;
     try {
       await postAdmin(adminKey.trim(), { action: "mark_read", id });
       setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, read: true } : c)));
@@ -154,9 +207,10 @@ export default function AdminReviews() {
               />
               <Button
                 type="submit"
+                disabled={loading}
                 className="w-full bg-hero text-primary-foreground shadow-glow hover:shadow-elevated hover:brightness-110"
               >
-                Unlock
+                {loading ? "Checking…" : "Unlock"}
               </Button>
             </div>
             <div className="mt-6 text-center">
@@ -194,26 +248,15 @@ export default function AdminReviews() {
           </Button>
         </div>
 
-        <div className="mt-8 rounded-3xl border border-border/70 bg-card/70 p-6 shadow-elevated backdrop-blur-md">
-          <label className="text-sm text-muted-foreground" htmlFor="admin-key">
-            Admin key
-          </label>
-          <div className="mt-2 flex flex-col gap-3 sm:flex-row">
-            <Input
-              id="admin-key"
-              value={adminKey}
-              onChange={(e) => setAdminKey(e.target.value)}
-              placeholder="Enter your admin key"
-              className="bg-background/40"
-            />
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">This key is not stored in the browser.</p>
+        <div className="mt-8 flex justify-end">
+          <Button variant="outline" onClick={logout}>Sign out</Button>
         </div>
 
         <Tabs defaultValue="reviews" className="mt-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsList className={`grid w-full ${mode === "real" ? "grid-cols-3" : "grid-cols-2"} max-w-lg`}>
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
             <TabsTrigger value="contacts">Contact Forms</TabsTrigger>
+            {mode === "real" && <TabsTrigger value="logins">Login IPs</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="reviews" className="mt-4">
@@ -252,7 +295,7 @@ export default function AdminReviews() {
                             onClick={() => approve(r.id)}
                             disabled={loading}
                             size="sm"
-                            className="bg-green-600 text-white hover:bg-green-700"
+                            className="bg-primary text-primary-foreground hover:bg-primary/90"
                           >
                             <Check className="h-4 w-4 mr-1" /> Approve
                           </Button>
@@ -341,6 +384,29 @@ export default function AdminReviews() {
               </div>
             </div>
           </TabsContent>
+          {mode === "real" && (
+            <TabsContent value="logins" className="mt-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h2 className="font-display text-lg font-semibold">Recent logins</h2>
+                <Button size="sm" variant="outline" onClick={loadLogins} disabled={loading}>Refresh logins</Button>
+              </div>
+              <p className="mb-4 text-sm text-muted-foreground">Real and old-password logins, plus failed attempts. Records start from this update. IPs may belong to a VPN or shared network.</p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead><tr className="border-b border-border"><th className="p-3">IP address</th><th className="p-3">Access</th><th className="p-3">Logged in</th><th className="p-3">Session</th></tr></thead>
+                  <tbody>{logins.map((login) => (
+                    <tr key={login.id} className="border-b border-border/50">
+                      <td className="p-3 font-mono whitespace-nowrap">{login.ip_address}</td>
+                      <td className="p-3">{login.login_kind === "real" ? "Real admin" : login.login_kind === "decoy" ? "Old password" : "Failed"}</td>
+                      <td className="p-3 whitespace-nowrap">{new Date(login.created_at).toLocaleString()}</td>
+                      <td className="p-3">{login.login_kind === "real" && Date.parse(login.expires_at) > Date.now() ? "Active" : "Inactive"}</td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+                {logins.length === 0 && <p className="py-4 text-sm text-muted-foreground">No logins recorded yet.</p>}
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </main>
