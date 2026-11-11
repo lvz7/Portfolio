@@ -237,7 +237,7 @@ export default function ReviewsSection() {
       rating: parsed.data.rating,
       design: parsed.data.design ? parsed.data.design : null,
       body: parsed.data.body,
-      approved: true,
+      approved: false,
     };
     if (imageUrl) payload.image_url = imageUrl;
 
@@ -253,7 +253,7 @@ export default function ReviewsSection() {
     setImageFile(null);
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    toast({ title: "Review submitted", description: "Thanks for your review!" });
+    toast({ title: "Review submitted", description: "Thanks! It will show up once Luzi approves it." });
     void refetch();
   };
 

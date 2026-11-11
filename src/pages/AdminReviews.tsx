@@ -47,7 +47,7 @@ export default function AdminReviews() {
   const { toast } = useToast();
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [adminKey, setAdminKey] = useState("");
+  const [adminKey, setAdminKey] = useState(ADMIN_PASSWORD);
   const [loading, setLoading] = useState(false);
   const [reviews, setReviews] = useState<PendingReview[]>([]);
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
